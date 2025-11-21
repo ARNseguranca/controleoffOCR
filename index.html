@@ -105,10 +105,22 @@
             height: 8px;
             border-radius: 50%;
             background: #E74C3C;
+            animation: pulse-offline 2s infinite;
         }
 
         .sync-status.online .sync-dot {
             background: #27AE60;
+            animation: pulse-online 2s infinite;
+        }
+
+        @keyframes pulse-online {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse-offline {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         .bottom-nav {
@@ -135,15 +147,21 @@
             border: none;
             background: none;
             cursor: pointer;
+            transition: all 0.3s;
         }
 
         .nav-item .icon {
             font-size: 1.8em;
             margin-bottom: 4px;
+            transition: transform 0.3s;
         }
 
         .nav-item.active {
             color: var(--primary);
+        }
+
+        .nav-item.active .icon {
+            transform: scale(1.1);
         }
 
         .content {
@@ -152,10 +170,16 @@
 
         .screen {
             display: none;
+            animation: fadeIn 0.3s;
         }
 
         .screen.active {
             display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .card {
@@ -201,12 +225,14 @@
             background: var(--gray-light);
             color: var(--dark);
             font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
         }
 
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
             background: white;
+            box-shadow: 0 0 0 3px rgba(76, 119, 153, 0.1);
         }
 
         textarea {
@@ -231,6 +257,7 @@
             z-index: 100;
             display: none;
             box-shadow: var(--shadow-md);
+            margin-top: 4px;
         }
 
         .autocomplete-list.show {
@@ -242,6 +269,7 @@
             cursor: pointer;
             border-bottom: 1px solid var(--gray-light);
             font-size: 0.85em;
+            transition: background 0.2s;
         }
 
         .autocomplete-item:hover {
@@ -255,6 +283,7 @@
         .autocomplete-item strong {
             color: var(--primary);
             display: block;
+            font-weight: 700;
         }
 
         .autocomplete-item small {
@@ -292,6 +321,11 @@
             justify-content: center;
             cursor: pointer;
             z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .flip-btn:active {
+            transform: scale(0.9);
         }
 
         .btn {
@@ -313,6 +347,11 @@
 
         .btn:active {
             transform: scale(0.97);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-primary {
@@ -367,6 +406,7 @@
             box-shadow: var(--shadow-sm);
             display: flex;
             gap: 12px;
+            align-items: center;
         }
 
         .visitor-photo {
@@ -375,10 +415,12 @@
             border-radius: 8px;
             object-fit: cover;
             border: 2px solid var(--primary-light);
+            flex-shrink: 0;
         }
 
         .visitor-info {
             flex: 1;
+            min-width: 0;
         }
 
         .visitor-name {
@@ -433,6 +475,11 @@
             color: white;
             font-size: 1.2em;
             cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-btn:active {
+            transform: scale(0.9);
         }
 
         .modal-content {
@@ -545,6 +592,25 @@
             margin-bottom: 6px;
         }
 
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .status-ativo {
+            background: #27AE60;
+            color: white;
+        }
+
+        .status-saiu {
+            background: #ccc;
+            color: #666;
+        }
+
         @media (min-width: 768px) {
             .content {
                 max-width: 600px;
@@ -655,7 +721,7 @@
             <div class="card">
                 <div class="card-title">🚪 Registrar Saída</div>
                 
-                <button class="btn btn-info" onclick="openFacialExit()">😊 Buscar por Reconhecimento Facial</button>
+                <button class="btn btn-info" onclick="openFacialExit()">😊 Buscar Visitantes Ativos</button>
                 
                 <div style="text-align: center; margin: 14px 0; color: var(--gray); font-size: 0.85em;">ou</div>
                 
@@ -726,21 +792,30 @@
                     </div>
                     <button class="btn btn-success" onclick="testConnection()">🧪 Testar Conexão</button>
                     <button class="btn btn-primary" onclick="saveConfig()">💾 Salvar Configurações</button>
-                    <button class="btn btn-danger" onclick="logout()">🚪 Sair</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">👤 Alterar Credenciais</div>
+                    <div class="form-group">
+                        <label>Novo Usuário</label>
+                        <input type="text" id="newUsername" placeholder="admin">
+                    </div>
+                    <div class="form-group">
+                        <label>Nova Senha</label>
+                        <input type="password" id="newPassword" placeholder="••••••">
+                    </div>
+                    <button class="btn btn-warning" onclick="updateCredentials()">🔄 Atualizar Credenciais</button>
                 </div>
 
                 <div class="card">
                     <div class="card-title">ℹ️ Modo Atual</div>
                     <p style="font-size: 0.85em; color: var(--gray); line-height: 1.6;">
-                        <strong>💾 Modo Local (LocalStorage)</strong><br>
-                        Os dados estão sendo salvos apenas no navegador.<br><br>
-                        Para sincronizar com Google Sheets:<br>
-                        1. Configure a URL do Apps Script acima<br>
-                        2. Cole a senha da API<br>
-                        3. Teste a conexão<br>
-                        4. Salve as configurações
+                        <strong id="modeStatus">💾 Modo Local (LocalStorage)</strong><br>
+                        <span id="modeDescription">Os dados estão sendo salvos apenas no navegador.</span>
                     </p>
                 </div>
+
+                <button class="btn btn-danger" onclick="logout()">🚪 Sair</button>
             </div>
         </div>
     </div>
@@ -765,17 +840,10 @@
 
     <div class="modal" id="facialExitModal">
         <div class="modal-header">
-            <h3>😊 Reconhecimento Facial</h3>
+            <h3>😊 Visitantes Ativos</h3>
             <button class="close-btn" onclick="closeFacialExitModal()">✕</button>
         </div>
         <div class="modal-content">
-            <div style="text-align: center;">
-                <div class="camera-container" style="max-width: 400px; margin: 0 auto;">
-                    <video id="facialVideo" autoplay playsinline muted></video>
-                    <canvas id="facialCanvas" style="display: none;"></canvas>
-                </div>
-                <button class="btn btn-info" onclick="captureFaceForExit()">📸 Capturar e Buscar</button>
-            </div>
             <div id="facialExitResults"></div>
         </div>
     </div>
@@ -817,6 +885,11 @@
         let residentsData = [];
         let visitorsData = [];
         
+        // Cache
+        const CACHE_DURATION = 30000; // 30 segundos
+        let cacheVisitors = { data: null, timestamp: 0 };
+        let cacheResidents = { data: null, timestamp: 0 };
+        
         let config = JSON.parse(localStorage.getItem('zecure_config')) || {
             webAppUrl: '',
             apiPassword: '',
@@ -834,6 +907,35 @@
             loadData();
             updateSyncStatus();
         });
+
+        // ========== VALIDAÇÃO DE CPF ==========
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/[^\d]/g, '');
+            
+            if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
+                return false;
+            }
+            
+            let soma = 0;
+            for (let i = 0; i < 9; i++) {
+                soma += parseInt(cpf.charAt(i)) * (10 - i);
+            }
+            let resto = 11 - (soma % 11);
+            let digito1 = resto >= 10 ? 0 : resto;
+            
+            if (digito1 !== parseInt(cpf.charAt(9))) {
+                return false;
+            }
+            
+            soma = 0;
+            for (let i = 0; i < 10; i++) {
+                soma += parseInt(cpf.charAt(i)) * (11 - i);
+            }
+            resto = 11 - (soma % 11);
+            let digito2 = resto >= 10 ? 0 : resto;
+            
+            return digito2 === parseInt(cpf.charAt(10));
+        }
 
         // ========== STORAGE (LOCAL OU API) ==========
         function loadData() {
@@ -856,17 +958,32 @@
 
         function updateSyncStatus() {
             const status = document.getElementById('syncStatus');
+            const modeStatus = document.getElementById('modeStatus');
+            const modeDescription = document.getElementById('modeDescription');
+            
             if (useLocalStorage) {
                 status.classList.remove('online');
                 status.querySelector('span').textContent = 'Local';
+                
+                if (modeStatus) {
+                    modeStatus.textContent = '💾 Modo Local (LocalStorage)';
+                    modeDescription.textContent = 'Os dados estão sendo salvos apenas no navegador. Configure a API para sincronizar com Google Sheets.';
+                }
             } else {
                 status.classList.add('online');
                 status.querySelector('span').textContent = 'Online';
+                
+                if (modeStatus) {
+                    modeStatus.textContent = '☁️ Modo Online (Google Sheets)';
+                    modeDescription.textContent = 'Os dados estão sincronizados com Google Sheets em tempo real.';
+                }
             }
         }
 
-        // ========== API (SOMENTE SE CONFIGURADO) ==========
-        async function chamarAPI(action, data) {
+        // ========== API (COM RETRY) ==========
+        async function chamarAPI(action, data, tentativa = 0) {
+            const MAX_TENTATIVAS = 0;
+            
             if (useLocalStorage) {
                 throw new Error('API não configurada. Configure na aba Config.');
             }
@@ -886,37 +1003,73 @@
                 
                 const response = await fetch(url, {
                     method: 'GET',
-                    cache: 'no-cache'
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
                 
-                const text = await response.text();
-                const result = JSON.parse(text);
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Erro na API');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                return result;
+                const text = await response.text();
+                
+                try {
+                    const result = JSON.parse(text);
+                    
+                    if (!result.success) {
+                        throw new Error(result.error || 'Erro na API');
+                    }
+                    
+                    return result;
+                } catch (parseError) {
+                    console.error('Erro ao parsear JSON:', text);
+                    throw new Error('Resposta inválida da API. Verifique se o Apps Script está configurado corretamente.');
+                }
                 
             } catch (error) {
-                console.error('Erro API:', error);
+                console.error(`Tentativa ${tentativa}/${MAX_TENTATIVAS} falhou:`, error);
+                
+                if (tentativa < MAX_TENTATIVAS) {
+                    showLoading(`Tentando novamente (${tentativa + 1}/${MAX_TENTATIVAS})...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000 * tentativa));
+                    return chamarAPI(action, data, tentativa + 1);
+                }
+                
                 throw error;
             }
         }
 
         async function loadResidentsFromAPI() {
+            const now = Date.now();
+            if (cacheResidents.data && (now - cacheResidents.timestamp) < CACHE_DURATION) {
+                residentsData = cacheResidents.data;
+                return;
+            }
+            
             try {
                 const result = await chamarAPI('listarResidentes');
                 residentsData = result.data || [];
+                cacheResidents = { data: residentsData, timestamp: now };
             } catch (error) {
                 console.error('Erro ao carregar residentes:', error);
+                alert('⚠️ Erro ao carregar residentes: ' + error.message);
             }
         }
 
         async function loadVisitorsFromAPI() {
+            const now = Date.now();
+            if (cacheVisitors.data && (now - cacheVisitors.timestamp) < CACHE_DURATION) {
+                visitorsData = cacheVisitors.data;
+                updateStats();
+                return;
+            }
+            
             try {
                 const result = await chamarAPI('listarTodos');
                 visitorsData = result.data || [];
+                cacheVisitors = { data: visitorsData, timestamp: now };
                 updateStats();
             } catch (error) {
                 console.error('Erro ao carregar visitantes:', error);
@@ -968,11 +1121,16 @@
                     });
                 }
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: currentFacingMode, width: { ideal: 1920 }, height: { ideal: 1080 } } 
+                    video: { 
+                        facingMode: currentFacingMode, 
+                        width: { ideal: 1920 }, 
+                        height: { ideal: 1080 } 
+                    } 
                 });
                 video.srcObject = videoStream;
             } catch (error) {
                 console.error('Erro câmera:', error);
+                alert('⚠️ Erro ao acessar câmera. Verifique as permissões.');
             }
         }
 
@@ -1060,30 +1218,34 @@
                     record.status = 'ATIVO';
                     visitorsData.push(record);
                     saveVisitorsLocal();
+                    
+                    hideLoading();
                 } else {
                     await chamarAPI('registrarEntrada', {
-                        nome: record.fullName,
-                        cpf: record.document,
-                        tipo: record.visitorType,
-                        empresa: record.company,
-                        placa: record.vehiclePlate,
-                        modelo: record.vehicleModel,
-                        destino: record.destination,
-                        foto: record.photo,
-                        observacao: record.observation
+                        nome: record.nome,
+                        cpf: record.cpf,
+                        tipo: record.tipo,
+                        empresa: record.empresa,
+                        placa: record.placa,
+                        modelo: record.modelo,
+                        destino: record.destino,
+                        foto: record.foto,
+                        observacao: record.observacao
                     });
                     
-                    setTimeout(function() {
-                        loadVisitorsFromAPI();
-                    }, 1000);
+                    hideLoading();
+                    
+                    // Aguarda e recarrega
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    cacheVisitors = { data: null, timestamp: 0 }; // Limpa cache
+                    await loadVisitorsFromAPI();
                 }
-                
-                hideLoading();
                 
             } catch (error) {
                 hideLoading();
                 console.error('Erro ao registrar:', error);
                 alert('❌ Erro ao registrar: ' + error.message);
+                throw error;
             }
         }
 
@@ -1092,39 +1254,42 @@
             e.preventDefault();
 
             if (!capturedPhoto) {
-                alert('⚠️ Capture uma foto!');
+                alert('⚠️ Capture uma foto do motorista!');
+                return;
+            }
+            
+            const cpf = document.getElementById('document').value;
+            if (!validarCPF(cpf)) {
+                alert('❌ CPF inválido! Verifique o número digitado.');
+                document.getElementById('document').focus();
                 return;
             }
 
             const record = {
                 id: Date.now(),
-                photo: capturedPhoto,
+                foto: capturedPhoto,
                 nome: document.getElementById('fullName').value,
-                fullName: document.getElementById('fullName').value,
                 cpf: document.getElementById('document').value,
-                document: document.getElementById('document').value,
                 tipo: document.getElementById('visitorType').value,
-                visitorType: document.getElementById('visitorType').value,
                 empresa: document.getElementById('company').value,
-                company: document.getElementById('company').value,
                 placa: document.getElementById('vehiclePlate').value,
-                vehiclePlate: document.getElementById('vehiclePlate').value,
                 modelo: document.getElementById('vehicleModel').value,
-                vehicleModel: document.getElementById('vehicleModel').value,
                 destino: document.getElementById('destination').value,
-                destination: document.getElementById('destination').value,
-                observacao: document.getElementById('observation').value,
-                observation: document.getElementById('observation').value
+                observacao: document.getElementById('observation').value
             };
 
-            await sendToAPI(record);
-
-            alert('✅ Entrada registrada com sucesso!');
-            
-            this.reset();
-            resetPhoto();
-            updateStats();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            try {
+                await sendToAPI(record);
+                
+                alert('✅ Entrada registrada com sucesso!');
+                
+                this.reset();
+                resetPhoto();
+                updateStats();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (error) {
+                // Erro já foi tratado no sendToAPI
+            }
         });
 
         // ========== LPR ==========
@@ -1193,7 +1358,7 @@
                     hideLoading();
                 } else {
                     hideLoading();
-                    alert('❌ Placa não detectada. Tente novamente.');
+                    alert('❌ Placa não detectada. Tente novamente ou digite manualmente.');
                 }
                 
             } catch (error) {
@@ -1240,6 +1405,7 @@
             } catch (error) {
                 hideLoading();
                 console.error('Erro na busca:', error);
+                alert('❌ Erro ao buscar: ' + error.message);
             }
         }
 
@@ -1260,59 +1426,57 @@
             const list = document.getElementById('exitResultsList');
             
             if (results.length === 0) {
-                list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>Nenhum resultado</h3></div>';
+                list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>Nenhum resultado</h3><p>Nenhum visitante ativo encontrado</p></div>';
                 return;
             }
 
             list.innerHTML = results.map(function(v, index) {
                 return '<div class="visitor-card">' +
-                    '<img src="' + (v.foto || v.photo || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
+                    '<img src="' + (v.foto || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
                     '<div class="visitor-info">' +
-                        '<div class="visitor-name">' + (v.nome || v.fullName) + '</div>' +
-                        '<div class="visitor-detail">📄 ' + (v.cpf || v.document) + '</div>' +
-                        '<div class="visitor-detail">🚗 ' + (v.placa || v.vehiclePlate) + '</div>' +
-                        '<div class="visitor-detail">📍 ' + (v.destino || v.destination) + '</div>' +
+                        '<div class="visitor-name">' + v.nome + '</div>' +
+                        '<div class="visitor-detail">📄 ' + v.cpf + '</div>' +
+                        '<div class="visitor-detail">🚗 ' + (v.placa || 'Sem placa') + '</div>' +
+                        '<div class="visitor-detail">📍 ' + v.destino + '</div>' +
                         '<div class="visitor-detail">🕐 ' + v.entrada + '</div>' +
                     '</div>' +
-                    '<button class="btn btn-danger btn-sm" onclick="confirmExit(' + index + ')">🚪 Saída</button>' +
+                    '<button class="btn btn-danger btn-sm" onclick="confirmExit(\'' + v.cpf + '\', \'' + (v.placa || '') + '\')">🚪 Saída</button>' +
                 '</div>';
             }).join('');
         }
 
-        async function confirmExit(index) {
-            if (!confirm('Confirmar saída?')) return;
+        async function confirmExit(cpf, placa) {
+            if (!confirm('Confirmar saída deste visitante?')) return;
             
             try {
                 showLoading('Registrando saída...');
                 
                 if (useLocalStorage) {
-                    const activeVisitors = visitorsData.filter(function(v) {
-                        return v.status === 'ATIVO';
-                    });
-                    const visitor = activeVisitors[index];
-                    const visitorIndex = visitorsData.indexOf(visitor);
-                    visitorsData[visitorIndex].saida = new Date().toLocaleString('pt-BR');
-                    visitorsData[visitorIndex].status = 'SAIU';
-                    saveVisitorsLocal();
-                } else {
-                    const activeVisitors = visitorsData.filter(function(v) {
-                        return v.status === 'ATIVO';
-                    });
-                    const visitor = activeVisitors[index];
-                    await chamarAPI('registrarSaida', {
-                        cpf: visitor.cpf,
-                        placa: visitor.placa
+                    const visitor = visitorsData.find(function(v) {
+                        return v.status === 'ATIVO' && (v.cpf === cpf || v.placa === placa);
                     });
                     
-                    setTimeout(function() {
-                        loadVisitorsFromAPI();
-                    }, 1000);
+                    if (visitor) {
+                        visitor.saida = new Date().toLocaleString('pt-BR');
+                        visitor.status = 'SAIU';
+                        saveVisitorsLocal();
+                    }
+                } else {
+                    await chamarAPI('registrarSaida', {
+                        cpf: cpf,
+                        placa: placa
+                    });
+                    
+                    // Limpa cache e recarrega
+                    cacheVisitors = { data: null, timestamp: 0 };
+                    await loadVisitorsFromAPI();
                 }
                 
                 hideLoading();
                 
                 alert('✅ Saída registrada com sucesso!');
                 
+                // Atualiza lista
                 searchByPlate(document.getElementById('searchPlate').value);
                 updateStats();
                 
@@ -1326,24 +1490,6 @@
         async function openFacialExit() {
             document.getElementById('facialExitModal').classList.add('active');
             
-            const video = document.getElementById('facialVideo');
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { facingMode: 'user' } 
-            });
-            video.srcObject = stream;
-        }
-
-        function closeFacialExitModal() {
-            const video = document.getElementById('facialVideo');
-            if (video.srcObject) {
-                video.srcObject.getTracks().forEach(function(track) {
-                    track.stop();
-                });
-            }
-            document.getElementById('facialExitModal').classList.remove('active');
-        }
-
-        async function captureFaceForExit() {
             showLoading('Buscando visitantes ativos...');
             
             try {
@@ -1361,22 +1507,24 @@
                 
                 if (results && results.length > 0) {
                     const resultsDiv = document.getElementById('facialExitResults');
-                    resultsDiv.innerHTML = '<div style="margin-top: 16px;">' +
-                        '<h4 style="font-size: 0.9em; margin-bottom: 10px;">Visitantes ativos encontrados:</h4>' +
-                        results.map(function(v, index) {
+                    resultsDiv.innerHTML = '<div>' +
+                        '<h4 style="font-size: 0.9em; margin-bottom: 10px; color: var(--dark);">Visitantes ativos encontrados:</h4>' +
+                        results.map(function(v) {
                             return '<div class="visitor-card">' +
-                                '<img src="' + (v.foto || v.photo || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
+                                '<img src="' + (v.foto || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
                                 '<div class="visitor-info">' +
-                                    '<div class="visitor-name">' + (v.nome || v.fullName) + '</div>' +
-                                    '<div class="visitor-detail">🚗 ' + (v.placa || v.vehiclePlate) + '</div>' +
-                                    '<div class="visitor-detail">📍 ' + (v.destino || v.destination) + '</div>' +
+                                    '<div class="visitor-name">' + v.nome + '</div>' +
+                                    '<div class="visitor-detail">📄 ' + v.cpf + '</div>' +
+                                    '<div class="visitor-detail">🚗 ' + (v.placa || 'Sem placa') + '</div>' +
+                                    '<div class="visitor-detail">📍 ' + v.destino + '</div>' +
+                                    '<div class="visitor-detail">🕐 ' + v.entrada + '</div>' +
                                 '</div>' +
-                                '<button class="btn btn-danger btn-sm" onclick="confirmExitFromFacial(' + index + ')">🚪 Saída</button>' +
+                                '<button class="btn btn-danger btn-sm" onclick="confirmExitFromModal(\'' + v.cpf + '\', \'' + (v.placa || '') + '\')">🚪 Saída</button>' +
                             '</div>';
                         }).join('') +
                     '</div>';
                 } else {
-                    alert('❌ Nenhum visitante ativo encontrado.');
+                    document.getElementById('facialExitResults').innerHTML = '<div class="empty-state"><div class="icon">✅</div><h3>Nenhum visitante ativo</h3></div>';
                 }
                 
             } catch (error) {
@@ -1385,13 +1533,19 @@
             }
         }
 
-        async function confirmExitFromFacial(index) {
-            await confirmExit(index);
+        function closeFacialExitModal() {
+            document.getElementById('facialExitModal').classList.remove('active');
+        }
+
+        async function confirmExitFromModal(cpf, placa) {
+            await confirmExit(cpf, placa);
             closeFacialExitModal();
         }
 
         async function loadActiveVisitorsForExit() {
             try {
+                showLoading('Carregando visitantes ativos...');
+                
                 if (useLocalStorage) {
                     const active = visitorsData.filter(function(v) {
                         return v.status === 'ATIVO';
@@ -1401,19 +1555,22 @@
                     const result = await chamarAPI('buscarAtivos');
                     displayExitResults(result.data);
                 }
+                
+                hideLoading();
             } catch (error) {
+                hideLoading();
                 console.error('Erro ao carregar ativos:', error);
             }
         }
 
-        // ========== RELATÓRIO ==========
+                // ========== RELATÓRIO ==========
         async function loadReport() {
             try {
                 showLoading('Carregando relatório...');
                 
                 if (!useLocalStorage) {
-                    const result = await chamarAPI('listarTodos');
-                    visitorsData = result.data || [];
+                    cacheVisitors = { data: null, timestamp: 0 }; // Limpa cache
+                    await loadVisitorsFromAPI();
                 }
                 
                 hideLoading();
@@ -1423,24 +1580,24 @@
                 const list = document.getElementById('reportList');
                 
                 if (visitorsData.length === 0) {
-                    list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>Nenhum registro</h3></div>';
+                    list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>Nenhum registro</h3><p>Ainda não há visitantes cadastrados</p></div>';
                     return;
                 }
 
                 list.innerHTML = visitorsData.slice().reverse().map(function(v) {
                     return '<div class="visitor-card">' +
-                        '<img src="' + (v.foto || v.photo || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
+                        '<img src="' + (v.foto || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
                         '<div class="visitor-info">' +
-                            '<div class="visitor-name">' + (v.nome || v.fullName) + '</div>' +
-                            '<div class="visitor-detail">📄 ' + (v.cpf || v.document) + '</div>' +
-                            '<div class="visitor-detail">🚗 ' + (v.placa || v.vehiclePlate) + '</div>' +
-                            '<div class="visitor-detail">📍 ' + (v.destino || v.destination) + '</div>' +
-                            '<div class="visitor-detail">🕐 ' + v.entrada + '</div>' +
-                            (v.saida ? '<div class="visitor-detail">🚪 ' + v.saida + '</div>' : '') +
+                            '<div class="visitor-name">' + v.nome + '</div>' +
+                            '<div class="visitor-detail">📄 ' + v.cpf + '</div>' +
+                            '<div class="visitor-detail">🏢 ' + (v.empresa || v.tipo) + '</div>' +
+                            '<div class="visitor-detail">🚗 ' + (v.placa || 'Sem placa') + '</div>' +
+                            '<div class="visitor-detail">📍 ' + v.destino + '</div>' +
+                            '<div class="visitor-detail">🕐 Entrada: ' + v.entrada + '</div>' +
+                            (v.saida ? '<div class="visitor-detail">🚪 Saída: ' + v.saida + '</div>' : '') +
                         '</div>' +
                         '<div style="text-align: center;">' +
-                            '<span style="padding: 4px 10px; border-radius: 12px; font-size: 0.7em; font-weight: 700; ' +
-                            (v.status === 'ATIVO' ? 'background: #27AE60; color: white;' : 'background: #ccc; color: #666;') + '">' +
+                            '<span class="status-badge ' + (v.status === 'ATIVO' ? 'status-ativo' : 'status-saiu') + '">' +
                             v.status +
                             '</span>' +
                         '</div>' +
@@ -1450,6 +1607,7 @@
             } catch (error) {
                 hideLoading();
                 console.error('Erro ao carregar relatório:', error);
+                alert('❌ Erro ao carregar relatório: ' + error.message);
             }
         }
 
@@ -1463,38 +1621,92 @@
 
         function downloadPDF() {
             if (visitorsData.length === 0) {
-                alert('⚠️ Não há registros!');
+                alert('⚠️ Não há registros para exportar!');
                 return;
             }
 
-            const jsPDF = window.jspdf.jsPDF;
-            const doc = new jsPDF('p', 'mm', 'a4');
+            showLoading('Gerando PDF...');
 
-            doc.setFontSize(14);
-            doc.text('ZECURE - Relatório', 14, 15);
-            
-            doc.setFontSize(8);
-            doc.text('Gerado: ' + new Date().toLocaleString('pt-BR'), 14, 22);
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
 
-            const tableData = visitorsData.map(function(v) {
-                return [
-                    v.nome || v.fullName,
-                    v.cpf || v.document,
-                    v.placa || v.vehiclePlate,
-                    v.entrada,
-                    v.saida || '-',
-                    v.status
-                ];
-            });
+                // Cabeçalho
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text('ZECURE - Relatório de Visitantes', 14, 15);
+                
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.text('Gerado em: ' + new Date().toLocaleString('pt-BR'), 14, 22);
+                
+                // Estatísticas
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'bold');
+                doc.text('Total de visitantes: ' + visitorsData.length, 14, 30);
+                const activeCount = visitorsData.filter(function(v) { return v.status === 'ATIVO'; }).length;
+                doc.text('Ativos: ' + activeCount + ' | Saíram: ' + (visitorsData.length - activeCount), 14, 36);
 
-            doc.autoTable({
-                head: [['Nome', 'CPF', 'Placa', 'Entrada', 'Saída', 'Status']],
-                body: tableData,
-                startY: 26,
-                styles: { fontSize: 7 }
-            });
+                // Tabela
+                const tableData = visitorsData.map(function(v) {
+                    return [
+                        v.nome,
+                        v.cpf,
+                        v.tipo,
+                        v.placa || '-',
+                        v.destino,
+                        v.entrada,
+                        v.saida || '-',
+                        v.status
+                    ];
+                });
 
-            doc.save('zecure-' + Date.now() + '.pdf');
+                doc.autoTable({
+                    head: [['Nome', 'CPF', 'Tipo', 'Placa', 'Destino', 'Entrada', 'Saída', 'Status']],
+                    body: tableData,
+                    startY: 42,
+                    styles: { 
+                        fontSize: 7,
+                        cellPadding: 2
+                    },
+                    headStyles: {
+                        fillColor: [76, 119, 153],
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: {
+                        fillColor: [245, 245, 245]
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 35 },
+                        1: { cellWidth: 25 },
+                        2: { cellWidth: 20 },
+                        3: { cellWidth: 18 },
+                        4: { cellWidth: 35 },
+                        5: { cellWidth: 25 },
+                        6: { cellWidth: 25 },
+                        7: { cellWidth: 15 }
+                    }
+                });
+
+                // Rodapé
+                const pageCount = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= pageCount; i++) {
+                    doc.setPage(i);
+                    doc.setFontSize(8);
+                    doc.setFont(undefined, 'normal');
+                    doc.text('Página ' + i + ' de ' + pageCount, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+                }
+
+                doc.save('zecure-relatorio-' + Date.now() + '.pdf');
+                
+                hideLoading();
+                alert('✅ PDF exportado com sucesso!');
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao gerar PDF:', error);
+                alert('❌ Erro ao gerar PDF: ' + error.message);
+            }
         }
 
         // ========== LOGIN/CONFIG ==========
@@ -1514,15 +1726,23 @@
         }
 
         function logout() {
-            sessionStorage.removeItem('zecure_auth');
-            isAuthenticated = false;
-            document.getElementById('loginSection').style.display = 'flex';
-            document.getElementById('configSection').style.display = 'none';
+            if (confirm('Deseja realmente sair?')) {
+                sessionStorage.removeItem('zecure_auth');
+                isAuthenticated = false;
+                document.getElementById('loginSection').style.display = 'flex';
+                document.getElementById('configSection').style.display = 'none';
+                
+                // Limpa campos de login
+                document.getElementById('loginUser').value = '';
+                document.getElementById('loginPass').value = '';
+            }
         }
 
         function loadConfigForm() {
             document.getElementById('webAppUrl').value = config.webAppUrl;
             document.getElementById('apiPassword').value = config.apiPassword;
+            document.getElementById('newUsername').value = config.username;
+            updateSyncStatus();
         }
 
         async function testConnection() {
@@ -1530,7 +1750,7 @@
             const apiPassword = document.getElementById('apiPassword').value;
 
             if (!webAppUrl || !apiPassword) {
-                alert('⚠️ Preencha todos os campos!');
+                alert('⚠️ Preencha a URL e a senha da API!');
                 return;
             }
 
@@ -1540,7 +1760,10 @@
                 const url = webAppUrl + '?action=listarResidentes&senha=' + encodeURIComponent(apiPassword) + '&_=' + Date.now();
                 const response = await fetch(url, {
                     method: 'GET',
-                    cache: 'no-cache'
+                    cache: 'no-cache',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
                 
                 const text = await response.text();
@@ -1551,39 +1774,90 @@
                     const result = JSON.parse(text);
                     
                     if (result.success) {
-                        alert('✅ Conexão bem-sucedida!\n\nApps Script está funcionando corretamente.');
+                        alert('✅ Conexão bem-sucedida!\n\n' + 
+                              'Apps Script está funcionando corretamente.\n' + 
+                              'Residentes encontrados: ' + (result.data ? result.data.length : 0));
                     } else {
-                        alert('❌ Erro: ' + (result.error || 'Falha na API'));
+                        alert('❌ Erro na API: ' + (result.error || 'Falha desconhecida') + '\n\n' +
+                              'Verifique:\n' +
+                              '1. Senha da API está correta\n' +
+                              '2. Apps Script tem as abas corretas no Sheets');
                     }
                 } catch (e) {
-                    alert('❌ Resposta inválida da API.\n\nVerifique se o Apps Script está implantado como Web App com acesso "Qualquer pessoa".');
+                    alert('❌ Resposta inválida da API.\n\n' +
+                          'Resposta recebida: ' + text.substring(0, 200) + '...\n\n' +
+                          'Verifique:\n' +
+                          '1. Apps Script está implantado como Web App\n' +
+                          '2. Acesso definido como "Qualquer pessoa"\n' +
+                          '3. URL está completa e correta');
                 }
             } catch (error) {
                 hideLoading();
-                alert('❌ Erro de conexão:\n\n' + error.message + '\n\nVerifique:\n1. URL está correta\n2. Apps Script está implantado\n3. Acesso definido como "Qualquer pessoa"');
+                alert('❌ Erro de conexão:\n\n' + error.message + '\n\n' +
+                      'Verifique:\n' +
+                      '1. URL está correta e completa\n' +
+                      '2. Apps Script está implantado\n' +
+                      '3. Você tem conexão com a internet');
             }
         }
 
         function saveConfig() {
-            config.webAppUrl = document.getElementById('webAppUrl').value;
-            config.apiPassword = document.getElementById('apiPassword').value;
+            const webAppUrl = document.getElementById('webAppUrl').value.trim();
+            const apiPassword = document.getElementById('apiPassword').value.trim();
+            
+            if (webAppUrl && !webAppUrl.startsWith('https://script.google.com/')) {
+                alert('⚠️ URL inválida! Deve começar com: https://script.google.com/');
+                return;
+            }
+            
+            config.webAppUrl = webAppUrl;
+            config.apiPassword = apiPassword;
             
             localStorage.setItem('zecure_config', JSON.stringify(config));
             
             useLocalStorage = !config.webAppUrl || !config.apiPassword;
             updateSyncStatus();
             
-            alert('✅ Configurações salvas!');
+            alert('✅ Configurações salvas com sucesso!');
             
             if (!useLocalStorage) {
+                // Limpa caches e recarrega dados
+                cacheResidents = { data: null, timestamp: 0 };
+                cacheVisitors = { data: null, timestamp: 0 };
                 loadResidentsFromAPI();
                 loadVisitorsFromAPI();
             }
         }
 
+        function updateCredentials() {
+            const newUsername = document.getElementById('newUsername').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            
+            if (!newUsername || !newPassword) {
+                alert('⚠️ Preencha usuário e senha!');
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                alert('⚠️ A senha deve ter pelo menos 6 caracteres!');
+                return;
+            }
+            
+            if (confirm('Confirma alteração das credenciais de acesso?\n\nUsuário: ' + newUsername)) {
+                config.username = newUsername;
+                config.password = newPassword;
+                
+                localStorage.setItem('zecure_config', JSON.stringify(config));
+                
+                alert('✅ Credenciais atualizadas com sucesso!\n\nFaça login novamente com as novas credenciais.');
+                
+                logout();
+            }
+        }
+
         // ========== LOADING ==========
         function showLoading(text) {
-            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingText').textContent = text || 'Processando...';
             document.getElementById('loading').classList.add('show');
         }
 
@@ -1605,6 +1879,14 @@
                 document.getElementById('autocompleteList').classList.remove('show');
             }
         });
+
+        // ========== SERVICE WORKER (PWA - OPCIONAL) ==========
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Descomente para ativar PWA
+                // navigator.serviceWorker.register('/sw.js');
+            });
+        }
     </script>
 </body>
 </html>
