@@ -4,186 +4,892 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#4C7799">
-    
-    <!-- ✅ Meta tags PWA atualizadas -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Zecure">
     
-    <title>Zecure - Sistema Integrado</title>
+    <title>Zecure - Sistema de Controle de Acesso</title>
     
-    <!-- ✅ Favicon (Base64 inline) -->
     <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAAsTAAALEwEAmpwYAAABh0lEQVR4nO2WMU7DQBBFX4RoKJAQFRJSIAoukBtwgVTpKbiAaLlAGi6QhgvQUHABGhoKJCQKJKDgAjwpI1mWd+2Ns0Qi/WkkS7Mz8//M7nrXcf5fAfYBJ8AdMASeganvS2AInANdoOYGVeAKmOUo/k4ngMdiwB4wymO4k96BXigCr8VwJ30BfWCnKAJH0VPLfRFI0kURAm/AJ7ACNglQ05d+KkJgBVwDB7aE20BT3l1tBCwJJ8ChLeEG0NIcIRQBBqJvvY5uwV4kgGCVnreMOIApbzQUASZhGHHqTRcvGJCETWCBLvQCngFDNmvxT7yBfZbAL6pQL5D+VBpZKT5gESfFzaXR1eKToRzwLIHoYxkJ3AJXQF9JYCcwR5v+gWFAi0+Gk0N0A0pNINo9oe1B4lGk3UbI5ZPBMkLae/dZ6jqhMJjqKrL1hXwJzONYOAjY+ykrQNffRcT81EuNQFbZ/gWe/FoWAWmz+rVMyaHN4u/BNkvgVOWO/wFfh1OE6j9tPAAAAABJRU5ErkJggg==">
-    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8UlEQVR4nO2dW4hWVRTH/+M4XvKSkpqUlqZZD2VqPgRlD0VBhT0UXYiKHqKgByOih4iiByN6iKCHCCIoelAogiAquhBFN7oYRZcXu1mWZWk2Xsrpv2Axtmbms88+5+y99/etH3yPZ+21v732+c7aa6/9OY7jOI7jOI7jOE5bqAdwKYBHAbwO4BCA3wGcAPC/ufwN4DCAtwGsNO9xWkAXgDsAfAjgH+SXYwAeB1DHNHRYA+AmAF8DGEb9cgzAWgCj69RXpxgLYCOAPuRDH4AXAYyrQ3+dYgyAjwCcRmPyL4BXAIyuul8pMwnALgCnUL+cNH2bWmXfUmQqgM8BnEJz8ieAtwGMr6qPqTABwE4AJ9C8HAewD8DsKvqaAosB/IRm5ziA+wBMLruzHbJxnAfgi5KbegPAzLL62gGLAXxXYlNfm/HfKUMfO2ChAfjOQb1tP+4BcF8Z+toG95SQxpUBvgTwp7ncn+P6bwL4PMd9Hgdwbxn62gYrzEQ9K4cBrAEwNed9B0xGMJeZPOlx3RKULwD+AvCSWXy5OOd9O2AZgGdzXPeT6XMUAWAkgE0AzmSw8ruJ9G0luknelwE+zuA1UrXECQSAMQBeRLYofzPt50U3gPtzXP+W6XsuATCDgqXTGa59xczDWoIjgKuRfcS+TgAUVa8i+/f/LfN9cgkAq82En1WeQHMw14z+rPKsJQBma38XAjBmvj/5zNfPs/gExbAAwD8Z+73O9DsTgH6G7qcpAXgkY+r1ienDzxHXrzDv+RX55QWzMJUpyywBsMMSAG0AfovocOvn2K4Zb3nvPfJ6ADszBIB+2w+fAnACwHcAtoZ+gEqZZ0LXP2Tm4YMAfgzd7wmTPSgdJMd/CcBQyHu7eY+t3Ns2wEozvgvlJhMAXo64fpd5z9cArp9l2g/LKxF9nG/aP0sAFgM4S17rQteX/gWIow/AgxHtrjHtrzMBYDOA0+ZvywHMA7AMwBrT7q8ANkQEINY3RB+AByLaX2XavxP6G94BsIz/NR/AEoDdZitXzP6Kib59EZ/7CeBCFEA/gAcj2l9u2r+doL1FAB7L+LmxvoE8H6EjT5j2b07Q3gKUkEqGv/8+dH0p0b7HtD8/QXtS1YypiN4R3Tva0M6pHN6F7sWlFH0jX38m4nr5x0UIyP/9mwhuI0f+9xrT/t0J2lsI4N6I658y7ZfmI2DfQLPzbFvb2klOxaHQCu4JqGcSeTPit3+t+Q5vJWhvIYArgvvEJ6D7QVnSS0P3Xcq+gT4Broxoe6Vp/64E7dXeR5Afhqv0bxgz+8kA9tKcXOqk6TcQH4Csq5b0Lw/sMpPeUWYe8HXE7+W7aU7CPoIcn+H6oG/k2QxfgZz/jxgzXw//PsYjOJG0N8fYfy/kI3YgW2Fqo8j/+zyC/QLb6r8I2fwE5KdWmvUCK5fS6FcATgjdb1ugT/g9dP2F9g3IXuiyp4ltoXcW0l+bj+A7cK3pf1A6/i1tD34VcvVsO/wpV4bkY3abBafv6HosC10fpmr/glD7NrrM55W53h4bVOCRj+jT0F9GfgPp61j7I/YN1JrnmvYH6Fr7HlO+HRdbLtUz3BkYPw+bdg+ar+GAmRfMN887aq6fpv/vMtfPNO1/YR6Wss5L+U+T02+5VL8KGEsAl1m+glrzTLieZJ29vte2qf1jSA9txZ43m1O8EIxzVQhWJVepFk6U0YbqC5Zq98ppw2sJG0KjQQv+lJZXNQGhN2Y9wWsJm+N9AAvQSjmA1qMkFI1u50KUg9x/ozOBbqfBqKRsuRQEteZaGjd19A2MzVC+UwXrGvAV0DfgKgQ3HCsJW4/QatqnwrO1mMjqI9imQ27BZBJ9AySQ2iRDnlvlPZcFu37q/CnHdgQl3YWSsA3h/gZVXU6b2C9Mxaxe6Sp2nVjVVKz+AKN3BfvaZ+3PrjLPRWi9vKa0D1WcqRR9rBSrrS6j0XMR+MjPe1s27vk1VZy5k+Z7r0i/vMqkdWHXNhVyTa+w+ouyIe9u1qPtjuM4juM4juM4+eV/0NBlq6TU1CIAAAAASUVORK5CYII=">
     
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     
     <style>
-        /* ... RESTO DO CSS PERMANECE IGUAL ... */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #4C7799;
+            --primary-light: #98B3C9;
+            --primary-dark: #3A5B75;
+            --dark: #2C3E50;
+            --gray: #7A7A7A;
+            --gray-light: #E8EEF3;
+            --success: #27AE60;
+            --danger: #E74C3C;
+            --warning: #F39C12;
+            --info: #3498DB;
+            --radius-sm: 12px;
+            --radius-md: 16px;
+            --shadow-sm: 0 2px 8px rgba(76, 119, 153, 0.1);
+            --shadow-md: 0 4px 16px rgba(76, 119, 153, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, var(--gray-light) 0%, #F5F8FA 100%);
+            color: var(--dark);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: white;
+            padding: 18px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+
+        .header-text h1 {
+            font-size: 1.1em;
+            font-weight: 800;
+        }
+
+        .header-text p {
+            font-size: 0.7em;
+            opacity: 0.9;
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7em;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #E74C3C;
+            animation: pulse-offline 2s infinite;
+        }
+
+        .sync-status.online .sync-dot {
+            background: #27AE60;
+            animation: pulse-online 2s infinite;
+        }
+
+        @keyframes pulse-online {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes pulse-offline {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .operator-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            padding: 8px 0 16px;
+            box-shadow: 0 -4px 20px rgba(76, 119, 153, 0.15);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            color: var(--gray);
+            font-size: 0.65em;
+            font-weight: 600;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-item .icon {
+            font-size: 1.8em;
+            margin-bottom: 4px;
+            transition: transform 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active .icon {
+            transform: scale(1.1);
+        }
+
+        .content {
+            padding: 14px;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 18px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-title {
+            font-size: 0.95em;
+            font-weight: 700;
+            margin-bottom: 14px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gray-light);
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8em;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--gray-light);
+            border-radius: var(--radius-sm);
+            font-size: 0.9em;
+            font-weight: 500;
+            background: var(--gray-light);
+            color: var(--dark);
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(76, 119, 153, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .autocomplete-wrapper {
+            position: relative;
+        }
+
+        .autocomplete-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: var(--radius-sm);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: var(--shadow-md);
+            margin-top: 4px;
+        }
+
+        .autocomplete-list.show {
+            display: block;
+        }
+
+        .autocomplete-item {
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--gray-light);
+            font-size: 0.85em;
+            transition: background 0.2s;
+        }
+
+        .autocomplete-item:hover {
+            background: var(--gray-light);
+        }
+
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-item strong {
+            color: var(--primary);
+            display: block;
+            font-weight: 700;
+        }
+
+        .autocomplete-item small {
+            color: var(--gray);
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: var(--dark);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 10px;
+            border: 3px solid var(--primary-light);
+        }
+
+        video, .photo-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .flip-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: all 0.3s;
+        }
+
+        .flip-btn:active {
+            transform: scale(0.9);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.85em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 8px 12px;
+            font-size: 0.75em;
+            width: auto;
+            margin: 0;
+        }
+
+        .visitor-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 14px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            animation: slideIn 0.3s;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .visitor-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+            flex-shrink: 0;
+        }
+
+        .visitor-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .visitor-name {
+            font-size: 0.95em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .visitor-detail {
+            font-size: 0.75em;
+            color: var(--gray);
+            margin-bottom: 2px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 9999;
+            flex-direction: column;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 1em;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-btn:active {
+            transform: scale(0.9);
+        }
+
+        .modal-content {
+            flex: 1;
+            padding: 18px;
+            overflow-y: auto;
+        }
+
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        }
+
+        .login-box {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 40px 30px;
+            box-shadow: var(--shadow-md);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-box .logo-large {
+            font-size: 4em;
+            margin-bottom: 10px;
+        }
+
+        .login-box h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .login-box p {
+            color: var(--gray);
+            font-size: 0.85em;
+            margin-bottom: 30px;
+        }
+
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(44, 62, 80, 0.95);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 16px;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 4px;
+        }
+
+        .stat-card p {
+            font-size: 0.7em;
+            opacity: 0.9;
+            text-transform: uppercase;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state .icon {
+            font-size: 3em;
+            margin-bottom: 12px;
+            opacity: 0.3;
+        }
+
+        .empty-state h3 {
+            font-size: 1.1em;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .status-ativo {
+            background: #27AE60;
+            color: white;
+        }
+
+        .status-inativo {
+            background: #ccc;
+            color: #666;
+        }
+
+        .similarity-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--success);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.7em;
+            font-weight: 700;
+        }
+
+        @media (min-width: 768px) {
+            .content {
+                max-width: 600px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
 <body>
-    <div class="header">
-        <div class="header-content">
-            <div class="header-left">
-                <div class="logo">🔐</div>
-                <div class="header-text">
-                    <h1>ZECURE</h1>
-                    <p>Sistema Integrado</p>
-                </div>
+    <!-- TELA DE LOGIN OPERADOR -->
+    <div id="operatorLoginScreen" class="login-container">
+        <div class="login-box">
+            <div class="logo-large">🔐</div>
+            <h2>ZECURE</h2>
+            <p>Sistema de Controle de Acesso</p>
+            <div class="form-group" style="text-align: left;">
+                <label>Nome do Operador *</label>
+                <input type="text" id="operatorName" placeholder="Digite seu nome" required>
             </div>
-            <div class="sync-status" id="syncStatus">
-                <div class="sync-dot"></div>
-                <span>Local</span>
-            </div>
+            <button class="btn btn-primary" onclick="loginOperator()">🚀 Iniciar Sistema</button>
         </div>
     </div>
 
-    <div class="content">
-        <!-- TELA DE CADASTRO -->
-        <div id="cadastroScreen" class="screen active">
-            <form id="accessForm">
-                <div class="card">
-                    <div class="card-title">📸 Foto do Motorista</div>
-                    <div class="camera-container">
-                        <video id="video" autoplay playsinline muted></video>
-                        <img id="photoPreview" class="photo-preview" style="display:none;">
-                        <canvas id="canvas" style="display:none;"></canvas>
-                        <button type="button" class="flip-btn" onclick="flipCamera()">🔄</button>
+    <!-- SISTEMA PRINCIPAL (oculto até login) -->
+    <div id="mainSystem" style="display: none;">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="logo">🔐</div>
+                    <div class="header-text">
+                        <h1>ZECURE</h1>
+                        <p>Controle de Acesso</p>
                     </div>
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-primary" onclick="takePhoto()">📷 Capturar</button>
-                        <button type="button" class="btn btn-outline" onclick="resetPhoto()">🔄 Refazer</button>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
+                    <div class="operator-badge" id="operatorBadge">
+                        <span>👤</span>
+                        <span id="operatorNameDisplay"></span>
+                    </div>
+                    <div class="sync-status" id="syncStatus">
+                        <div class="sync-dot"></div>
+                        <span>Local</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- TELA DE CADASTRO/ENTRADA -->
+            <div id="cadastroScreen" class="screen active">
+                <form id="accessForm">
+                    <div class="card">
+                        <div class="card-title">📸 Reconhecimento Facial</div>
+                        <div class="camera-container">
+                            <video id="video" autoplay playsinline muted></video>
+                            <img id="photoPreview" class="photo-preview" style="display:none;">
+                            <canvas id="canvas" style="display:none;"></canvas>
+                            <button type="button" class="flip-btn" onclick="flipCamera()">🔄</button>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary" onclick="takePhoto()">📷 Capturar</button>
+                            <button type="button" class="btn btn-outline" onclick="resetPhoto()">🔄 Refazer</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">👤 Dados Pessoais</div>
+                        <div class="form-group">
+                            <label>Nome Completo *</label>
+                            <input type="text" id="fullName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>CPF ou Passaporte *</label>
+                            <input type="text" id="document" maxlength="14" placeholder="000.000.000-00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo *</label>
+                            <select id="visitorType" required>
+                                <option value="">Selecione</option>
+                                <option>Visitante</option>
+                                                                <option>Prestador de Serviço</option>
+                                <option>Transporte</option>
+                                <option>Hóspede</option>
+                                <option>Entregador</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Empresa</label>
+                            <input type="text" id="company">
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">🚗 Veículo</div>
+                        <button type="button" class="btn btn-warning" onclick="openLPRScanner()">📷 Escanear Placa</button>
+                        <div class="form-group">
+                            <label>Placa</label>
+                            <input type="text" id="vehiclePlate" maxlength="8" placeholder="ABC-1234" style="text-transform: uppercase;">
+                        </div>
+                        <div class="form-group">
+                            <label>Cor do Veículo</label>
+                            <input type="text" id="vehicleColor" placeholder="Ex: Preto, Prata, Branco">
+                        </div>
+                        <div class="form-group">
+                            <label>Modelo</label>
+                            <input type="text" id="vehicleModel" placeholder="Ex: Gol, Civic, HB20">
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">📍 Destino</div>
+                        <div class="form-group autocomplete-wrapper">
+                            <label>Buscar Morador *</label>
+                            <input 
+                                type="text" 
+                                id="destination" 
+                                placeholder="Digite nome ou endereço..." 
+                                autocomplete="off"
+                                oninput="searchResidents(this.value)"
+                                required
+                            >
+                            <div class="autocomplete-list" id="autocompleteList"></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Observações</label>
+                            <textarea id="observation" placeholder="Informações adicionais..."></textarea>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success" style="padding: 16px; font-size: 1em;">✅ REGISTRAR ENTRADA</button>
+                </form>
+            </div>
+
+            <!-- TELA DE MONITORAMENTO -->
+            <div id="monitoramentoScreen" class="screen">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="activeVisitors">0</h3>
+                        <p>Ativos Agora</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="todayEntries">0</h3>
+                        <p>Entradas Hoje</p>
                     </div>
                 </div>
 
                 <div class="card">
-                    <div class="card-title">👤 Dados Pessoais</div>
-                    <div class="form-group">
-                        <label>Nome Completo *</label>
-                        <input type="text" id="fullName" required>
-                    </div>
-                    <div class="form-group">
-                        <label>CPF *</label>
-                        <input type="text" id="document" maxlength="14" placeholder="000.000.000-00" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Tipo *</label>
-                        <select id="visitorType" required>
-                            <option value="">Selecione</option>
-                            <option>Entregador</option>
-                            <option>Visitante</option>
-                            <option>Prestador de Serviço</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Empresa</label>
-                        <input type="text" id="company">
-                    </div>
+                    <div class="card-title">🔴 Monitoramento em Tempo Real</div>
+                    <button class="btn btn-info" onclick="refreshMonitoring()">🔄 Atualizar</button>
                 </div>
 
-                <div class="card">
-                    <div class="card-title">🚗 Veículo</div>
-                    <button type="button" class="btn btn-warning" onclick="openLPRScanner()">📷 Escanear Placa</button>
-                    <div class="form-group">
-                        <label>Placa</label>
-                        <input type="text" id="vehiclePlate" maxlength="8" placeholder="ABC-1234" style="text-transform: uppercase;">
-                    </div>
-                    <div class="form-group">
-                        <label>Modelo</label>
-                        <input type="text" id="vehicleModel">
-                    </div>
-                </div>
+                <div id="monitoringList"></div>
+            </div>
 
+            <!-- TELA DE SAÍDA -->
+            <div id="saidaScreen" class="screen">
                 <div class="card">
-                    <div class="card-title">📍 Destino</div>
-                    <div class="form-group autocomplete-wrapper">
-                        <label>Destino (Residente) *</label>
+                    <div class="card-title">🚪 Registrar Saída</div>
+                    
+                    <button class="btn btn-info" onclick="openFacialSearch()">👥 Listar Visitantes Ativos</button>
+                    
+                    <div style="text-align: center; margin: 14px 0; color: var(--gray); font-size: 0.85em;">ou</div>
+                    
+                    <div class="form-group">
+                        <label>Buscar por Nome</label>
                         <input 
                             type="text" 
-                            id="destination" 
-                            placeholder="Digite para buscar..." 
-                            autocomplete="off"
-                            oninput="searchResidents(this.value)"
-                            required
+                            id="searchName" 
+                            placeholder="Digite o nome..." 
+                            oninput="searchByName(this.value)"
                         >
-                        <div class="autocomplete-list" id="autocompleteList"></div>
                     </div>
+
                     <div class="form-group">
-                        <label>Observações</label>
-                        <textarea id="observation"></textarea>
+                        <label>Buscar por CPF</label>
+                        <input 
+                            type="text" 
+                            id="searchCPF" 
+                            placeholder="000.000.000-00" 
+                            maxlength="14"
+                            oninput="searchByCPF(this.value)"
+                        >
                     </div>
-                </div>
 
-                <button type="submit" class="btn btn-success" style="padding: 16px; font-size: 1em;">✅ REGISTRAR ENTRADA</button>
-            </form>
-        </div>
-
-        <!-- TELA DE SAÍDA -->
-        <div id="saidaScreen" class="screen">
-            <div class="card">
-                <div class="card-title">🚪 Registrar Saída</div>
-                
-                <button class="btn btn-info" onclick="openFacialExit()">😊 Buscar Visitantes Ativos</button>
-                
-                <div style="text-align: center; margin: 14px 0; color: var(--gray); font-size: 0.85em;">ou</div>
-                
-                <div class="form-group">
-                    <label>Buscar por Placa</label>
-                    <input 
-                        type="text" 
-                        id="searchPlate" 
-                        placeholder="ABC-1234" 
-                        style="text-transform: uppercase;"
-                        oninput="searchByPlate(this.value)"
-                    >
-                </div>
-
-                <button class="btn btn-warning" onclick="openLPRForExit()">📷 Escanear Placa para Buscar</button>
-            </div>
-
-            <div id="exitResultsList"></div>
-        </div>
-
-        <!-- TELA DE RELATÓRIO -->
-        <div id="relatorioScreen" class="screen">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3 id="totalVisitors">0</h3>
-                    <p>Total</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="activeVisitors">0</h3>
-                    <p>Ativos</p>
-                </div>
-            </div>
-
-            <div class="card">
-                <button class="btn btn-primary" onclick="downloadPDF()">📄 Exportar PDF</button>
-            </div>
-
-            <div id="reportList"></div>
-        </div>
-
-        <!-- TELA DE CONFIG -->
-        <div id="configScreen" class="screen">
-            <div id="loginSection" class="login-container">
-                <div class="login-box">
-                    <h2>🔒 Acesso Restrito</h2>
+                    <button class="btn btn-warning" onclick="openLPRForExit()">📷 Escanear Placa para Buscar</button>
+                    
+                    <div style="text-align: center; margin: 14px 0; color: var(--gray); font-size: 0.85em;">ou</div>
+                    
                     <div class="form-group">
-                        <label>Usuário</label>
-                        <input type="text" id="loginUser" placeholder="admin">
+                        <label>Buscar por Placa</label>
+                        <input 
+                            type="text" 
+                            id="searchPlate" 
+                            placeholder="ABC-1234" 
+                            style="text-transform: uppercase;"
+                            oninput="searchByPlate(this.value)"
+                        >
                     </div>
-                    <div class="form-group">
-                        <label>Senha</label>
-                        <input type="password" id="loginPass" placeholder="••••••">
-                    </div>
-                    <button class="btn btn-primary" onclick="doLogin()">🔓 Entrar</button>
                 </div>
+
+                <div id="exitResultsList"></div>
             </div>
 
-            <div id="configSection" style="display: none;">
+            <!-- TELA DE RELATÓRIO -->
+            <div id="relatorioScreen" class="screen">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3 id="totalVisitors">0</h3>
+                        <p>Total</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3 id="inactiveVisitors">0</h3>
+                        <p>Saídas</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <button class="btn btn-primary" onclick="downloadPDF()">📄 Exportar PDF</button>
+                </div>
+
+                <div id="reportList"></div>
+            </div>
+
+            <!-- TELA DE CONFIG -->
+            <div id="configScreen" class="screen">
+                <div class="card">
+                    <div class="card-title">👤 Operador Atual</div>
+                    <p style="font-size: 0.9em; color: var(--gray); margin-bottom: 10px;">
+                        Logado como: <strong id="configOperatorName"></strong>
+                    </p>
+                    <button class="btn btn-warning" onclick="changeOperator()">🔄 Trocar Operador</button>
+                </div>
+
                 <div class="card">
                     <div class="card-title">🔗 Apps Script API</div>
                     <div class="form-group">
@@ -199,28 +905,37 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-title">👤 Alterar Credenciais</div>
-                    <div class="form-group">
-                        <label>Novo Usuário</label>
-                        <input type="text" id="newUsername" placeholder="admin">
-                    </div>
-                    <div class="form-group">
-                        <label>Nova Senha</label>
-                        <input type="password" id="newPassword" placeholder="••••••">
-                    </div>
-                    <button class="btn btn-warning" onclick="updateCredentials()">🔄 Atualizar Credenciais</button>
-                </div>
-
-                <div class="card">
                     <div class="card-title">ℹ️ Modo Atual</div>
                     <p style="font-size: 0.85em; color: var(--gray); line-height: 1.6;">
                         <strong id="modeStatus">💾 Modo Local (LocalStorage)</strong><br>
                         <span id="modeDescription">Os dados estão sendo salvos apenas no navegador.</span>
                     </p>
                 </div>
-
-                <button class="btn btn-danger" onclick="logout()">🚪 Sair</button>
             </div>
+        </div>
+
+        <!-- NAV -->
+        <div class="bottom-nav">
+            <button class="nav-item active" onclick="showScreen('cadastro')">
+                <div class="icon">📝</div>
+                <div>Entrada</div>
+            </button>
+            <button class="nav-item" onclick="showScreen('monitoramento')">
+                <div class="icon">📺</div>
+                <div>Monitor</div>
+            </button>
+            <button class="nav-item" onclick="showScreen('saida')">
+                <div class="icon">🚪</div>
+                <div>Saída</div>
+            </button>
+            <button class="nav-item" onclick="showScreen('relatorio')">
+                <div class="icon">📊</div>
+                <div>Relatório</div>
+            </button>
+            <button class="nav-item" onclick="showScreen('config')">
+                <div class="icon">⚙️</div>
+                <div>Config</div>
+            </button>
         </div>
     </div>
 
@@ -242,34 +957,14 @@
         </div>
     </div>
 
-    <div class="modal" id="facialExitModal">
+    <div class="modal" id="facialSearchModal">
         <div class="modal-header">
-            <h3>😊 Visitantes Ativos</h3>
-            <button class="close-btn" onclick="closeFacialExitModal()">✕</button>
+            <h3>👥 Visitantes Ativos</h3>
+            <button class="close-btn" onclick="closeFacialSearchModal()">✕</button>
         </div>
         <div class="modal-content">
-            <div id="facialExitResults"></div>
+            <div id="facialSearchResults"></div>
         </div>
-    </div>
-
-    <!-- NAV -->
-    <div class="bottom-nav">
-        <button class="nav-item active" onclick="showScreen('cadastro')">
-            <div class="icon">📝</div>
-            <div>Entrada</div>
-        </button>
-        <button class="nav-item" onclick="showScreen('saida')">
-            <div class="icon">🚪</div>
-            <div>Saída</div>
-        </button>
-        <button class="nav-item" onclick="showScreen('relatorio')">
-            <div class="icon">📊</div>
-            <div>Relatório</div>
-        </button>
-        <button class="nav-item" onclick="showScreen('config')">
-            <div class="icon">⚙️</div>
-            <div>Config</div>
-        </button>
     </div>
 
     <!-- LOADING -->
@@ -288,28 +983,56 @@
         let detectedPlate = null;
         let residentsData = [];
         let visitorsData = [];
+        let currentOperator = '';
         
-        // Cache
-        const CACHE_DURATION = 30000; // 30 segundos
+        const CACHE_DURATION = 10000;
         let cacheVisitors = { data: null, timestamp: 0 };
         let cacheResidents = { data: null, timestamp: 0 };
         
         let config = JSON.parse(localStorage.getItem('zecure_config')) || {
             webAppUrl: '',
-            apiPassword: '',
-            username: 'admin',
-            password: 'zecure2024'
+            apiPassword: ''
         };
 
-        let isAuthenticated = sessionStorage.getItem('zecure_auth') === 'true';
         let useLocalStorage = !config.webAppUrl || !config.apiPassword;
+        let monitoringInterval = null;
 
-        // ========== INICIALIZAÇÃO ==========
-        document.addEventListener('DOMContentLoaded', function() {
+        // ========== LOGIN OPERADOR ==========
+        function loginOperator() {
+            const operatorName = document.getElementById('operatorName').value.trim();
+            
+            if (!operatorName || operatorName.length < 3) {
+                alert('⚠️ Digite um nome válido (mínimo 3 caracteres)!');
+                return;
+            }
+            
+            currentOperator = operatorName;
+            sessionStorage.setItem('zecure_operator', operatorName);
+            
+            document.getElementById('operatorLoginScreen').style.display = 'none';
+            document.getElementById('mainSystem').style.display = 'block';
+            document.getElementById('operatorNameDisplay').textContent = operatorName;
+            document.getElementById('configOperatorName').textContent = operatorName;
+            
             initCamera();
             setupCPFMask();
             loadData();
             updateSyncStatus();
+        }
+
+        function changeOperator() {
+            if (confirm('Deseja trocar de operador? O sistema será reiniciado.')) {
+                sessionStorage.removeItem('zecure_operator');
+                location.reload();
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedOperator = sessionStorage.getItem('zecure_operator');
+            if (savedOperator) {
+                document.getElementById('operatorName').value = savedOperator;
+                loginOperator();
+            }
         });
 
         // ========== VALIDAÇÃO DE CPF ==========
@@ -341,13 +1064,14 @@
             return digito2 === parseInt(cpf.charAt(10));
         }
 
-        // ========== STORAGE (LOCAL OU API) ==========
+        // ========== STORAGE ==========
         function loadData() {
             if (useLocalStorage) {
                 visitorsData = JSON.parse(localStorage.getItem('zecure_visitors')) || [];
                 residentsData = JSON.parse(localStorage.getItem('zecure_residents')) || [
-                    {nome: 'João Silva', endereco: 'Rua A, 123'},
-                    {nome: 'Maria Santos', endereco: 'Av. B, 456'}
+                    {nome: 'João Silva', endereco: 'Rua das Flores, 123'},
+                    {nome: 'Maria Santos', endereco: 'Av. Principal, 456'},
+                    {nome: 'Pedro Alves', endereco: 'Rua do Bosque, 789'}
                 ];
                 updateStats();
             } else {
@@ -371,7 +1095,7 @@
                 
                 if (modeStatus) {
                     modeStatus.textContent = '💾 Modo Local (LocalStorage)';
-                    modeDescription.textContent = 'Os dados estão sendo salvos apenas no navegador. Configure a API para sincronizar com Google Sheets.';
+                    modeDescription.textContent = 'Os dados estão sendo salvos apenas no navegador.';
                 }
             } else {
                 status.classList.add('online');
@@ -379,14 +1103,14 @@
                 
                 if (modeStatus) {
                     modeStatus.textContent = '☁️ Modo Online (Google Sheets)';
-                    modeDescription.textContent = 'Os dados estão sincronizados com Google Sheets em tempo real.';
+                    modeDescription.textContent = 'Os dados estão sincronizados com Google Sheets.';
                 }
             }
         }
 
-        // ========== API (COM RETRY) ==========
-        async function chamarAPI(action, data, tentativa = 0) {
-            const MAX_TENTATIVAS = 0;
+        // ========== API ==========
+        async function chamarAPI(action, data, tentativa = 1) {
+            const MAX_TENTATIVAS = 3;
             
             if (useLocalStorage) {
                 throw new Error('API não configurada. Configure na aba Config.');
@@ -400,7 +1124,14 @@
                 });
                 
                 if (data) {
-                    params.append('data', JSON.stringify(data));
+                    if (typeof data === 'string') {
+                        params.append(action === 'buscarResidentePorNome' ? 'query' : 
+                                     action === 'buscarPorNome' ? 'nome' :
+                                     action === 'buscarPorCPF' ? 'cpf' :
+                                     action === 'buscarPorPlaca' ? 'placa' : 'data', data);
+                    } else {
+                        params.append('data', JSON.stringify(data));
+                    }
                 }
                 
                 const url = config.webAppUrl + '?' + params.toString();
@@ -418,22 +1149,16 @@
                 }
                 
                 const text = await response.text();
+                const result = JSON.parse(text);
                 
-                try {
-                    const result = JSON.parse(text);
-                    
-                    if (!result.success) {
-                        throw new Error(result.error || 'Erro na API');
-                    }
-                    
-                    return result;
-                } catch (parseError) {
-                    console.error('Erro ao parsear JSON:', text);
-                    throw new Error('Resposta inválida da API. Verifique se o Apps Script está configurado corretamente.');
+                if (!result.success) {
+                    throw new Error(result.error || 'Erro na API');
                 }
                 
+                return result;
+                
             } catch (error) {
-                console.error(`Tentativa ${tentativa}/${MAX_TENTATIVAS} falhou:`, error);
+                console.error(`Tentativa ${tentativa} de ${MAX_TENTATIVAS} falhou:`, error);
                 
                 if (tentativa < MAX_TENTATIVAS) {
                     showLoading(`Tentando novamente (${tentativa + 1}/${MAX_TENTATIVAS})...`);
@@ -456,9 +1181,7 @@
                 const result = await chamarAPI('listarResidentes');
                 residentsData = result.data || [];
                 cacheResidents = { data: residentsData, timestamp: now };
-            } catch (error) {
-                console.error('Erro ao carregar residentes:', error);
-                alert('⚠️ Erro ao carregar residentes: ' + error.message);
+            } catch (error) {                console.error('Erro ao carregar residentes:', error);
             }
         }
 
@@ -482,15 +1205,12 @@
 
         // ========== NAVEGAÇÃO ==========
         function showScreen(screen) {
-            document.querySelectorAll('.screen').forEach(function(s) {
-                s.classList.remove('active');
-            });
-            document.querySelectorAll('.nav-item').forEach(function(n) {
-                n.classList.remove('active');
-            });
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
             const screens = {
                 'cadastro': 'cadastroScreen',
+                'monitoramento': 'monitoramentoScreen',
                 'saida': 'saidaScreen',
                 'relatorio': 'relatorioScreen',
                 'config': 'configScreen'
@@ -499,36 +1219,34 @@
             document.getElementById(screens[screen]).classList.add('active');
             event.target.closest('.nav-item').classList.add('active');
             
+            if (screen === 'monitoramento') {
+                loadMonitoring();
+                startMonitoringAutoRefresh();
+            } else {
+                stopMonitoringAutoRefresh();
+            }
+            
             if (screen === 'relatorio') {
                 loadReport();
             } else if (screen === 'saida') {
                 loadActiveVisitorsForExit();
             } else if (screen === 'config') {
-                if (!isAuthenticated) {
-                    document.getElementById('loginSection').style.display = 'flex';
-                    document.getElementById('configSection').style.display = 'none';
-                } else {
-                    document.getElementById('loginSection').style.display = 'none';
-                    document.getElementById('configSection').style.display = 'block';
-                    loadConfigForm();
-                }
+                loadConfigForm();
             }
         }
 
-        // ========== CÂMERA ==========
+        // ========== CÂMERA (CORRIGIDO - RESOLUÇÃO REDUZIDA) ==========
         async function initCamera() {
             try {
                 const video = document.getElementById('video');
                 if (videoStream) {
-                    videoStream.getTracks().forEach(function(track) {
-                        track.stop();
-                    });
+                    videoStream.getTracks().forEach(track => track.stop());
                 }
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: currentFacingMode, 
-                        width: { ideal: 1920 }, 
-                        height: { ideal: 1080 } 
+                        width: { ideal: 640 },   // ✅ REDUZIDO
+                        height: { ideal: 480 }    // ✅ REDUZIDO
                     } 
                 });
                 video.srcObject = videoStream;
@@ -548,11 +1266,16 @@
             const canvas = document.getElementById('canvas');
             const preview = document.getElementById('photoPreview');
             
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0);
+            // ✅ RESOLUÇÃO REDUZIDA
+            canvas.width = 320;
+            canvas.height = 240;
             
-            capturedPhoto = canvas.toDataURL('image/jpeg', 0.3);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, 320, 240);
+            
+            // ✅ COMPRESSÃO MÁXIMA
+            capturedPhoto = canvas.toDataURL('image/jpeg', 0.1);
+            
             preview.src = capturedPhoto;
             preview.style.display = 'block';
             video.style.display = 'none';
@@ -565,17 +1288,45 @@
         }
 
         // ========== CPF MASK ==========
-        function setupCPFMask() {
-            document.getElementById('document').addEventListener('input', function(e) {
-                let value = e.target.value.replace(/[^\d]/g, '');
-                if (value.length <= 11) {
-                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                    value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                    e.target.value = value;
-                }
+        // ========== CPF MASK + AUTO-BUSCA ==========
+    function setupCPFMask() {
+    const docInput = document.getElementById('document');
+    const searchCPFInput = document.getElementById('searchCPF');
+    
+    // Campo de entrada (cadastro)
+    if (docInput) {
+        docInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d]/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = value;
+            }
+        });
+        
+        // ✅ NOVO: Busca automática quando CPF completo
+        docInput.addEventListener('blur', function(e) {
+            const cpf = e.target.value.replace(/[^\d]/g, '');
+            if (cpf.length === 11) {
+                searchVisitorByCPF(e.target.value);
+            }
+        });
+    }
+    
+    // Campo de busca (saída)
+    if (searchCPFInput) {
+        searchCPFInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^\d]/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = value;
+            }
             });
         }
+    }
 
         // ========== RESIDENTES ==========
         async function searchResidents(query) {
@@ -586,29 +1337,170 @@
                 return;
             }
 
-            const filtered = residentsData.filter(function(r) {
-                return r.nome.toLowerCase().includes(query.toLowerCase()) ||
-                       r.endereco.toLowerCase().includes(query.toLowerCase());
-            });
+            let filtered = [];
+            
+            if (useLocalStorage) {
+                filtered = residentsData.filter(r => 
+                    r.nome.toLowerCase().includes(query.toLowerCase()) ||
+                    r.endereco.toLowerCase().includes(query.toLowerCase())
+                );
+            } else {
+                try {
+                    const result = await chamarAPI('buscarResidentePorNome', query);
+                    filtered = result.data || [];
+                } catch (error) {
+                    console.error('Erro ao buscar residente:', error);
+                    return;
+                }
+            }
 
             if (filtered.length === 0) {
                 list.classList.remove('show');
                 return;
             }
 
-            list.innerHTML = filtered.slice(0, 5).map(function(r) {
+            list.innerHTML = filtered.slice(0, 5).map(r => {
                 const nomeEscapado = r.nome.replace(/'/g, "\'");
                 const enderecoEscapado = r.endereco.replace(/'/g, "\'");
-                return '<div class="autocomplete-item" onclick="selectResident(\'' + nomeEscapado + '\', \'' + enderecoEscapado + '\')"><strong>' + r.nome + '</strong><small>' + r.endereco + '</small></div>';
+                
+                return `<div class="autocomplete-item" onclick="selectResident('${nomeEscapado}', '${enderecoEscapado}')">
+                    <strong>${r.nome}</strong>
+                    <small>${r.endereco}</small>
+                </div>`;
             }).join('');
             
             list.classList.add('show');
         }
 
         function selectResident(nome, endereco) {
-            document.getElementById('destination').value = nome + ' - ' + endereco;
+            document.getElementById('destination').value = `${nome} - ${endereco}`;
             document.getElementById('autocompleteList').classList.remove('show');
         }
+        
+        // ========== BUSCA E AUTO-PREENCHIMENTO POR CPF ==========
+async function searchVisitorByCPF(cpf) {
+    const cpfLimpo = cpf.replace(/[^\d]/g, '');
+    
+    // Só busca se CPF tiver 11 dígitos
+    if (cpfLimpo.length !== 11) {
+        return;
+    }
+    
+    showLoading('Buscando histórico...');
+    
+    try {
+        let visitor = null;
+        
+        if (useLocalStorage) {
+            // Busca no localStorage (pega o mais recente)
+            const visitors = visitorsData.filter(v => 
+                v.cpf.replace(/[^\d]/g, '') === cpfLimpo
+            );
+            
+            if (visitors.length > 0) {
+                // Pega o mais recente
+                visitor = visitors[visitors.length - 1];
+            }
+        } else {
+            // Busca na API
+            try {
+                const result = await chamarAPI('buscarPorCPF', cpf);
+                if (result.data && result.data.length > 0) {
+                    // Pega o mais recente (último do array)
+                    visitor = result.data[result.data.length - 1];
+                }
+            } catch (error) {
+                console.error('Erro ao buscar CPF na API:', error);
+            }
+        }
+        
+        hideLoading();
+        
+        if (visitor) {
+            autoFillVisitorData(visitor);
+        }
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Erro ao buscar visitante:', error);
+    }
+}
+
+function autoFillVisitorData(visitor) {
+    // Preenche os campos automaticamente
+    document.getElementById('fullName').value = visitor.nome;
+    document.getElementById('visitorType').value = visitor.tipo;
+    document.getElementById('company').value = visitor.empresa || '';
+    document.getElementById('vehiclePlate').value = visitor.placa || '';
+    document.getElementById('vehicleColor').value = visitor.cor || '';
+    document.getElementById('vehicleModel').value = visitor.modelo || '';
+    
+    // Mostra notificação de dados carregados
+    showAutoFillNotification(visitor);
+}
+
+function showAutoFillNotification(visitor) {
+    // Remove notificação anterior se existir
+    const oldNotification = document.querySelector('.autofill-notification');
+    if (oldNotification) {
+        oldNotification.remove();
+    }
+    
+    // Cria nova notificação
+    const notification = document.createElement('div');
+    notification.className = 'autofill-notification';
+    notification.innerHTML = `
+        <div style="background: linear-gradient(135deg, #27AE60, #229954); color: white; padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3); animation: slideDown 0.3s;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="font-size: 1.5em;">✅</div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 700; font-size: 0.9em; margin-bottom: 4px;">Dados Carregados do Histórico!</div>
+                    <div style="font-size: 0.75em; opacity: 0.95;">
+                        Nome: <strong>${visitor.nome}</strong><br>
+                        ${visitor.placa ? `Placa: <strong>${visitor.placa}</strong> (${visitor.cor || ''} ${visitor.modelo || ''})` : 'Sem veículo cadastrado anteriormente'}
+                    </div>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 1.2em;">×</button>
+            </div>
+            <div style="font-size: 0.7em; margin-top: 8px; opacity: 0.9;">
+                💡 Confira os dados e atualize se necessário
+            </div>
+        </div>
+    `;
+    
+    // Adiciona animação CSS
+    if (!document.querySelector('#autofillAnimation')) {
+        const style = document.createElement('style');
+        style.id = 'autofillAnimation';
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translateY(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Insere no início do formulário
+    const form = document.getElementById('accessForm');
+    form.insertBefore(notification, form.firstChild);
+    
+    // Scroll suave para o topo
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Remove automaticamente após 10 segundos
+    setTimeout(() => {
+        notification.style.transition = 'opacity 0.5s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 500);
+    }, 10000);
+}
 
         // ========== REGISTRAR ENTRADA ==========
         async function sendToAPI(record) {
@@ -620,6 +1512,8 @@
                     record.entrada = agora.toLocaleString('pt-BR');
                     record.saida = '';
                     record.status = 'ATIVO';
+                    record.operadorEntrada = currentOperator;
+                    record.operadorSaida = '';
                     visitorsData.push(record);
                     saveVisitorsLocal();
                     
@@ -631,17 +1525,18 @@
                         tipo: record.tipo,
                         empresa: record.empresa,
                         placa: record.placa,
+                        cor: record.cor,
                         modelo: record.modelo,
                         destino: record.destino,
                         foto: record.foto,
-                        observacao: record.observacao
+                        observacao: record.observacao,
+                        operador: currentOperator
                     });
                     
                     hideLoading();
                     
-                    // Aguarda e recarrega
                     await new Promise(resolve => setTimeout(resolve, 1500));
-                    cacheVisitors = { data: null, timestamp: 0 }; // Limpa cache
+                    cacheVisitors = { data: null, timestamp: 0 };
                     await loadVisitorsFromAPI();
                 }
                 
@@ -658,12 +1553,13 @@
             e.preventDefault();
 
             if (!capturedPhoto) {
-                alert('⚠️ Capture uma foto do motorista!');
+                alert('⚠️ Capture uma foto para reconhecimento facial!');
                 return;
             }
             
             const cpf = document.getElementById('document').value;
-            if (!validarCPF(cpf)) {
+            
+            if (cpf.replace(/[^\d]/g, '').length === 11 && !validarCPF(cpf)) {
                 alert('❌ CPF inválido! Verifique o número digitado.');
                 document.getElementById('document').focus();
                 return;
@@ -677,6 +1573,7 @@
                 tipo: document.getElementById('visitorType').value,
                 empresa: document.getElementById('company').value,
                 placa: document.getElementById('vehiclePlate').value,
+                cor: document.getElementById('vehicleColor').value,
                 modelo: document.getElementById('vehicleModel').value,
                 destino: document.getElementById('destination').value,
                 observacao: document.getElementById('observation').value
@@ -685,18 +1582,88 @@
             try {
                 await sendToAPI(record);
                 
-                alert('✅ Entrada registrada com sucesso!');
+                alert('✅ Entrada registrada com sucesso!\n\nOperador: ' + currentOperator);
                 
                 this.reset();
                 resetPhoto();
                 updateStats();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
-                // Erro já foi tratado no sendToAPI
+                // Erro já foi tratado
             }
         });
 
-        // ========== LPR ==========
+        // ========== MONITORAMENTO ==========
+        async function loadMonitoring() {
+            try {
+                showLoading('Carregando monitoramento...');
+                
+                if (!useLocalStorage) {
+                    cacheVisitors = { data: null, timestamp: 0 };
+                    await loadVisitorsFromAPI();
+                }
+                
+                hideLoading();
+                displayMonitoring();
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao carregar monitoramento:', error);
+            }
+        }
+
+        function displayMonitoring() {
+            const list = document.getElementById('monitoringList');
+            const ativos = visitorsData.filter(v => v.status === 'ATIVO');
+            
+            document.getElementById('activeVisitors').textContent = ativos.length;
+            
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            const entradasHoje = visitorsData.filter(v => 
+                v.entrada && v.entrada.includes(hoje)
+            ).length;
+            document.getElementById('todayEntries').textContent = entradasHoje;
+            
+            if (ativos.length === 0) {
+                list.innerHTML = `<div class="empty-state">
+                    <div class="icon">✅</div>
+                    <h3>Nenhum visitante ativo</h3>
+                    <p>Sem visitantes no momento</p>
+                </div>`;
+                return;
+            }
+
+            list.innerHTML = ativos.map(v => `
+                <div class="visitor-card">
+                    <img src="${v.foto || ''}" class="visitor-photo" onerror="this.style.display='none'">
+                    <div class="visitor-info">
+                        <div class="visitor-name">${v.nome}</div>
+                        <div class="visitor-detail">📍 ${v.destino}</div>
+                        <div class="visitor-detail">🕐 Entrada: ${v.entrada}</div>
+                        <div class="visitor-detail">👤 Por: ${v.operadorEntrada || 'N/A'}</div>
+                    </div>
+                    <span class="status-badge status-ativo">ATIVO</span>
+                </div>
+            `).join('');
+        }
+
+        function refreshMonitoring() {
+            loadMonitoring();
+        }
+
+        function startMonitoringAutoRefresh() {
+            stopMonitoringAutoRefresh();
+            monitoringInterval = setInterval(() => loadMonitoring(), 30000);
+        }
+
+        function stopMonitoringAutoRefresh() {
+            if (monitoringInterval) {
+                clearInterval(monitoringInterval);
+                monitoringInterval = null;
+            }
+        }
+
+        // ========== LPR (CORRIGIDO) ==========
         function openLPRScanner() {
             document.getElementById('lprModal').classList.add('active');
             detectedPlate = null;
@@ -712,7 +1679,11 @@
             
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: 'environment' } 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 640 },   // ✅ REDUZIDO
+                        height: { ideal: 480 }   // ✅ REDUZIDO
+                    } 
                 });
 
                 const video = document.createElement('video');
@@ -720,28 +1691,25 @@
                 video.autoplay = true;
                 video.playsinline = true;
 
-                await new Promise(function(resolve) {
-                    video.onloadedmetadata = function() {
+                await new Promise(resolve => {
+                    video.onloadedmetadata = () => {
                         video.play();
                         resolve();
                     };
                 });
 
-                await new Promise(function(resolve) {
-                    setTimeout(resolve, 1000);
-                });
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
                 const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
+                canvas.width = 640;   // ✅ REDUZIDO
+                canvas.height = 480;  // ✅ REDUZIDO
+                canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
 
-                const processedImage = canvas.toDataURL('image/png');
+                // ✅ COMPRESSÃO MÁXIMA
+                const processedImage = canvas.toDataURL('image/jpeg', 0.1);
                 document.getElementById('lprPreview').src = processedImage;
 
-                stream.getTracks().forEach(function(track) {
-                    track.stop();
-                });
+                stream.getTracks().forEach(track => track.stop());
 
                 showLoading('Processando OCR...');
                 
@@ -781,26 +1749,24 @@
             }
         }
 
-        // ========== BUSCA POR PLACA (SAÍDA) ==========
-        async function searchByPlate(plate) {
-            if (!plate || plate.length < 3) {
+        // ========== BUSCA PARA SAÍDA ==========
+        async function searchByName(nome) {
+            if (!nome || nome.length < 2) {
                 document.getElementById('exitResultsList').innerHTML = '';
                 return;
             }
             
             try {
-                showLoading('Buscando...');
+                showLoading('Buscando por nome...');
                 
                 let results;
                 if (useLocalStorage) {
-                    results = visitorsData.filter(function(v) {
-                        return v.status === 'ATIVO' && v.placa && v.placa.toUpperCase().includes(plate.toUpperCase());
-                    });
+                    results = visitorsData.filter(v => 
+                        v.status === 'ATIVO' && v.nome.toLowerCase().includes(nome.toLowerCase())
+                    );
                 } else {
-                    const result = await chamarAPI('buscarAtivos');
-                    results = result.data.filter(function(v) {
-                        return v.placa && v.placa.toUpperCase().includes(plate.toUpperCase());
-                    });
+                    const result = await chamarAPI('buscarPorNome', nome);
+                    results = result.data || [];
                 }
                 
                 hideLoading();
@@ -808,8 +1774,65 @@
                 
             } catch (error) {
                 hideLoading();
-                console.error('Erro na busca:', error);
-                alert('❌ Erro ao buscar: ' + error.message);
+                console.error('Erro na busca por nome:', error);
+            }
+        }
+
+        async function searchByCPF(cpf) {
+            if (!cpf || cpf.replace(/[^\d]/g, '').length < 3) {
+                document.getElementById('exitResultsList').innerHTML = '';
+                return;
+            }
+            
+            try {
+                showLoading('Buscando por CPF...');
+                
+                let results;
+                if (useLocalStorage) {
+                    const cpfLimpo = cpf.replace(/[^\d]/g, '');
+                    results = visitorsData.filter(v => {
+                        const cpfVisitante = v.cpf.replace(/[^\d]/g, '');
+                        return v.status === 'ATIVO' && cpfVisitante.includes(cpfLimpo);
+                    });
+                } else {
+                    const result = await chamarAPI('buscarPorCPF', cpf);
+                    results = result.data || [];
+                }
+                
+                hideLoading();
+                displayExitResults(results);
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro na busca por CPF:', error);
+            }
+        }
+
+        async function searchByPlate(plate) {
+            if (!plate || plate.length < 3) {
+                document.getElementById('exitResultsList').innerHTML = '';
+                return;
+            }
+            
+            try {
+                showLoading('Buscando por placa...');
+                
+                let results;
+                if (useLocalStorage) {
+                    results = visitorsData.filter(v => 
+                        v.status === 'ATIVO' && v.placa && v.placa.toUpperCase().includes(plate.toUpperCase())
+                    );
+                } else {
+                    const result = await chamarAPI('buscarPorPlaca', plate);
+                    results = result.data || [];
+                }
+                
+                hideLoading();
+                displayExitResults(results);
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro na busca por placa:', error);
             }
         }
 
@@ -826,27 +1849,98 @@
             };
         }
 
+        // ========== BUSCA FACIAL (CORRIGIDO) ==========
+        async function openFacialSearch() {
+            document.getElementById('facialSearchModal').classList.add('active');
+            await captureFaceForSearch();
+        }
+
+        function closeFacialSearchModal() {
+            document.getElementById('facialSearchModal').classList.remove('active');
+        }
+
+        async function captureFaceForSearch() {
+            showLoading('Buscando visitantes ativos...');
+            
+            try {
+                let results;
+                
+                if (useLocalStorage) {
+                    results = visitorsData.filter(v => v.status === 'ATIVO');
+                } else {
+                    const result = await chamarAPI('buscarAtivos');
+                    results = result.data || [];
+                }
+                
+                hideLoading();
+                
+                if (results.length === 0) {
+                    alert('❌ Nenhum visitante ativo encontrado.');
+                    return;
+                }
+                
+                const resultsDiv = document.getElementById('facialSearchResults');
+                
+                resultsDiv.innerHTML = `<div style="margin-top: 16px;">
+                    <h4 style="font-size: 0.9em; margin-bottom: 10px; color: var(--dark); padding: 10px; background: var(--gray-light); border-radius: 8px;">
+                        👤 ${results.length} visitante(s) ativo(s) - Selecione para registrar saída:
+                    </h4>
+                    ${results.map(v => `
+                        <div class="visitor-card">
+                            <img src="${v.foto || ''}" class="visitor-photo" onerror="this.style.display='none'">
+                            <div class="visitor-info">
+                                <div class="visitor-name">${v.nome}</div>
+                                <div class="visitor-detail">📄 ${v.cpf}</div>
+                                <div class="visitor-detail">🏢 ${v.empresa || v.tipo}</div>
+                                <div class="visitor-detail">🚗 ${v.placa || 'Sem placa'} ${v.cor ? '(' + v.cor + ' ' + v.modelo + ')' : ''}</div>
+                                <div class="visitor-detail">📍 ${v.destino}</div>
+                                <div class="visitor-detail">🕐 ${v.entrada}</div>
+                                <div class="visitor-detail">👤 Por: ${v.operadorEntrada || 'N/A'}</div>
+                            </div>
+                            <button class="btn btn-danger btn-sm" onclick="confirmExitFromFacial('${v.cpf}', '${v.placa || ''}')">🚪 Saída</button>
+                        </div>
+                    `).join('')}
+                </div>`;
+                
+            } catch (error) {
+                hideLoading();
+                alert('❌ Erro ao buscar visitantes: ' + error.message);
+            }
+        }
+
+        async function confirmExitFromFacial(cpf, placa) {
+            await confirmExit(cpf, placa);
+            closeFacialSearchModal();
+        }
+
+        // ========== EXIBIR RESULTADOS DE SAÍDA ==========
         function displayExitResults(results) {
             const list = document.getElementById('exitResultsList');
             
             if (results.length === 0) {
-                list.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>Nenhum resultado</h3><p>Nenhum visitante ativo encontrado</p></div>';
+                list.innerHTML = `<div class="empty-state">
+                    <div class="icon">🔍</div>
+                    <h3>Nenhum resultado</h3>
+                    <p>Nenhum visitante ativo encontrado</p>
+                </div>`;
                 return;
             }
 
-            list.innerHTML = results.map(function(v, index) {
-                return '<div class="visitor-card">' +
-                    '<img src="' + (v.foto || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
-                    '<div class="visitor-info">' +
-                        '<div class="visitor-name">' + v.nome + '</div>' +
-                        '<div class="visitor-detail">📄 ' + v.cpf + '</div>' +
-                        '<div class="visitor-detail">🚗 ' + (v.placa || 'Sem placa') + '</div>' +
-                        '<div class="visitor-detail">📍 ' + v.destino + '</div>' +
-                        '<div class="visitor-detail">🕐 ' + v.entrada + '</div>' +
-                    '</div>' +
-                    '<button class="btn btn-danger btn-sm" onclick="confirmExit(\'' + v.cpf + '\', \'' + (v.placa || '') + '\')">🚪 Saída</button>' +
-                '</div>';
-            }).join('');
+            list.innerHTML = results.map(v => `
+                <div class="visitor-card">
+                    <img src="${v.foto || ''}" class="visitor-photo" onerror="this.style.display='none'">
+                    <div class="visitor-info">
+                        <div class="visitor-name">${v.nome}</div>
+                        <div class="visitor-detail">📄 ${v.cpf}</div>
+                        <div class="visitor-detail">🏢 ${v.empresa || v.tipo}</div>
+                        <div class="visitor-detail">🚗 ${v.placa || 'Sem placa'} ${v.cor ? '(' + v.cor + ')' : ''}</div>
+                        <div class="visitor-detail">📍 ${v.destino}</div>
+                        <div class="visitor-detail">🕐 ${v.entrada}</div>
+                        <div class="visitor-detail">👤 Entrada por: ${v.operadorEntrada || 'N/A'}</div>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="confirmExit('${v.cpf}', '${v.placa || ''}')">🚪 Registrar Saída</button>
+                </div>
+            `).join('');
         }
 
         async function confirmExit(cpf, placa) {
@@ -856,32 +1950,36 @@
                 showLoading('Registrando saída...');
                 
                 if (useLocalStorage) {
-                    const visitor = visitorsData.find(function(v) {
-                        return v.status === 'ATIVO' && (v.cpf === cpf || v.placa === placa);
-                    });
+                    const visitor = visitorsData.find(v => 
+                        v.status === 'ATIVO' && (v.cpf === cpf || v.placa === placa)
+                    );
                     
                     if (visitor) {
                         visitor.saida = new Date().toLocaleString('pt-BR');
-                        visitor.status = 'SAIU';
+                        visitor.status = 'INATIVO';
+                        visitor.operadorSaida = currentOperator;
                         saveVisitorsLocal();
                     }
                 } else {
                     await chamarAPI('registrarSaida', {
                         cpf: cpf,
-                        placa: placa
+                        placa: placa,
+                        operador: currentOperator
                     });
                     
-                    // Limpa cache e recarrega
                     cacheVisitors = { data: null, timestamp: 0 };
                     await loadVisitorsFromAPI();
                 }
                 
                 hideLoading();
                 
-                alert('✅ Saída registrada com sucesso!');
+                alert('✅ Saída registrada com sucesso!\n\nOperador: ' + currentOperator);
                 
-                // Atualiza lista
-                searchByPlate(document.getElementById('searchPlate').value);
+                document.getElementById('searchName').value = '';
+                document.getElementById('searchCPF').value = '';
+                document.getElementById('searchPlate').value = '';
+                document.getElementById('exitResultsList').innerHTML = '';
+                
                 updateStats();
                 
             } catch (error) {
@@ -890,137 +1988,73 @@
             }
         }
 
-        // ========== RECONHECIMENTO FACIAL (SAÍDA) ==========
-        async function openFacialExit() {
-            document.getElementById('facialExitModal').classList.add('active');
-            
-            showLoading('Buscando visitantes ativos...');
-            
-            try {
-                let results;
-                if (useLocalStorage) {
-                    results = visitorsData.filter(function(v) {
-                        return v.status === 'ATIVO';
-                    });
-                } else {
-                    const result = await chamarAPI('buscarAtivos');
-                    results = result.data;
-                }
-                
-                hideLoading();
-                
-                if (results && results.length > 0) {
-                    const resultsDiv = document.getElementById('facialExitResults');
-                    resultsDiv.innerHTML = '<div>' +
-                        '<h4 style="font-size: 0.9em; margin-bottom: 10px; color: var(--dark);">Visitantes ativos encontrados:</h4>' +
-                        results.map(function(v) {
-                            return '<div class="visitor-card">' +
-                                '<img src="' + (v.foto || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
-                                '<div class="visitor-info">' +
-                                    '<div class="visitor-name">' + v.nome + '</div>' +
-                                    '<div class="visitor-detail">📄 ' + v.cpf + '</div>' +
-                                    '<div class="visitor-detail">🚗 ' + (v.placa || 'Sem placa') + '</div>' +
-                                    '<div class="visitor-detail">📍 ' + v.destino + '</div>' +
-                                    '<div class="visitor-detail">🕐 ' + v.entrada + '</div>' +
-                                '</div>' +
-                                '<button class="btn btn-danger btn-sm" onclick="confirmExitFromModal(\'' + v.cpf + '\', \'' + (v.placa || '') + '\')">🚪 Saída</button>' +
-                            '</div>';
-                        }).join('') +
-                    '</div>';
-                } else {
-                    document.getElementById('facialExitResults').innerHTML = '<div class="empty-state"><div class="icon">✅</div><h3>Nenhum visitante ativo</h3></div>';
-                }
-                
-            } catch (error) {
-                hideLoading();
-                alert('❌ Erro: ' + error.message);
-            }
-        }
-
-        function closeFacialExitModal() {
-            document.getElementById('facialExitModal').classList.remove('active');
-        }
-
-        async function confirmExitFromModal(cpf, placa) {
-            await confirmExit(cpf, placa);
-            closeFacialExitModal();
-        }
-
         async function loadActiveVisitorsForExit() {
             try {
-                showLoading('Carregando visitantes ativos...');
-                
-                if (useLocalStorage) {
-                    const active = visitorsData.filter(function(v) {
-                        return v.status === 'ATIVO';
-                    });
-                    displayExitResults(active);
-                } else {
-                    const result = await chamarAPI('buscarAtivos');
-                    displayExitResults(result.data);
+                if (!useLocalStorage) {
+                    cacheVisitors = { data: null, timestamp: 0 };
+                    await loadVisitorsFromAPI();
                 }
-                
-                hideLoading();
             } catch (error) {
-                hideLoading();
                 console.error('Erro ao carregar ativos:', error);
             }
         }
 
-                // ========== RELATÓRIO ==========
+        // ========== RELATÓRIO ==========
         async function loadReport() {
             try {
                 showLoading('Carregando relatório...');
                 
                 if (!useLocalStorage) {
-                    cacheVisitors = { data: null, timestamp: 0 }; // Limpa cache
+                    cacheVisitors = { data: null, timestamp: 0 };
                     await loadVisitorsFromAPI();
                 }
                 
                 hideLoading();
-                
                 updateStats();
                 
                 const list = document.getElementById('reportList');
                 
                 if (visitorsData.length === 0) {
-                    list.innerHTML = '<div class="empty-state"><div class="icon">📭</div><h3>Nenhum registro</h3><p>Ainda não há visitantes cadastrados</p></div>';
+                    list.innerHTML = `<div class="empty-state">
+                        <div class="icon">📭</div>
+                        <h3>Nenhum registro</h3>
+                        <p>Ainda não há visitantes cadastrados</p>
+                    </div>`;
                     return;
                 }
 
-                list.innerHTML = visitorsData.slice().reverse().map(function(v) {
-                    return '<div class="visitor-card">' +
-                        '<img src="' + (v.foto || '') + '" class="visitor-photo" onerror="this.style.display=\'none\'">' +
-                        '<div class="visitor-info">' +
-                            '<div class="visitor-name">' + v.nome + '</div>' +
-                            '<div class="visitor-detail">📄 ' + v.cpf + '</div>' +
-                            '<div class="visitor-detail">🏢 ' + (v.empresa || v.tipo) + '</div>' +
-                            '<div class="visitor-detail">🚗 ' + (v.placa || 'Sem placa') + '</div>' +
-                            '<div class="visitor-detail">📍 ' + v.destino + '</div>' +
-                            '<div class="visitor-detail">🕐 Entrada: ' + v.entrada + '</div>' +
-                            (v.saida ? '<div class="visitor-detail">🚪 Saída: ' + v.saida + '</div>' : '') +
-                        '</div>' +
-                        '<div style="text-align: center;">' +
-                            '<span class="status-badge ' + (v.status === 'ATIVO' ? 'status-ativo' : 'status-saiu') + '">' +
-                            v.status +
-                            '</span>' +
-                        '</div>' +
-                    '</div>';
-                }).join('');
+                list.innerHTML = visitorsData.slice().reverse().map(v => `
+                    <div class="visitor-card">
+                        <img src="${v.foto || ''}" class="visitor-photo" onerror="this.style.display='none'">
+                        <div class="visitor-info">
+                            <div class="visitor-name">${v.nome}</div>
+                            <div class="visitor-detail">📄 ${v.cpf}</div>
+                            <div class="visitor-detail">🏢 ${v.empresa || v.tipo}</div>
+                            <div class="visitor-detail">🚗 ${v.placa || 'Sem placa'} ${v.cor ? '(' + v.cor + ' ' + v.modelo + ')' : ''}</div>
+                            <div class="visitor-detail">📍 ${v.destino}</div>
+                            <div class="visitor-detail">🕐 Entrada: ${v.entrada} (por ${v.operadorEntrada || 'N/A'})</div>
+                            ${v.saida ? `<div class="visitor-detail">🚪 Saída: ${v.saida} (por ${v.operadorSaida || 'N/A'})</div>` : ''}
+                        </div>
+                        <div style="text-align: center;">
+                            <span class="status-badge ${v.status === 'ATIVO' ? 'status-ativo' : 'status-inativo'}">${v.status}</span>
+                        </div>
+                    </div>
+                `).join('');
                 
             } catch (error) {
                 hideLoading();
                 console.error('Erro ao carregar relatório:', error);
-                alert('❌ Erro ao carregar relatório: ' + error.message);
             }
         }
 
         function updateStats() {
             document.getElementById('totalVisitors').textContent = visitorsData.length;
-            const activeCount = visitorsData.filter(function(v) {
-                return v.status === 'ATIVO';
-            }).length;
+            
+            const activeCount = visitorsData.filter(v => v.status === 'ATIVO').length;
             document.getElementById('activeVisitors').textContent = activeCount;
+            
+            const inactiveCount = visitorsData.filter(v => v.status === 'INATIVO').length;
+            document.getElementById('inactiveVisitors').textContent = inactiveCount;
         }
 
         function downloadPDF() {
@@ -1033,72 +2067,48 @@
 
             try {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
+                const doc = new jsPDF('l', 'mm', 'a4');
 
-                // Cabeçalho
                 doc.setFontSize(16);
                 doc.setFont(undefined, 'bold');
-                doc.text('ZECURE - Relatório de Visitantes', 14, 15);
+                doc.text('ZECURE - Relatório de Controle de Acesso', 14, 15);
                 
                 doc.setFontSize(9);
                 doc.setFont(undefined, 'normal');
                 doc.text('Gerado em: ' + new Date().toLocaleString('pt-BR'), 14, 22);
                 
-                // Estatísticas
                 doc.setFontSize(10);
                 doc.setFont(undefined, 'bold');
-                doc.text('Total de visitantes: ' + visitorsData.length, 14, 30);
-                const activeCount = visitorsData.filter(function(v) { return v.status === 'ATIVO'; }).length;
-                doc.text('Ativos: ' + activeCount + ' | Saíram: ' + (visitorsData.length - activeCount), 14, 36);
+                doc.text(`Total: ${visitorsData.length} | Ativos: ${visitorsData.filter(v => v.status === 'ATIVO').length} | Saídas: ${visitorsData.filter(v => v.status === 'INATIVO').length}`, 14, 29);
 
-                // Tabela
-                const tableData = visitorsData.map(function(v) {
-                    return [
-                        v.nome,
-                        v.cpf,
-                        v.tipo,
-                        v.placa || '-',
-                        v.destino,
-                        v.entrada,
-                        v.saida || '-',
-                        v.status
-                    ];
-                });
+                const tableData = visitorsData.map(v => [
+                    v.nome,
+                    v.cpf,
+                    v.tipo,
+                    v.placa || '-',
+                    v.cor || '-',
+                    v.destino,
+                    v.entrada,
+                    v.saida || '-',
+                    v.operadorEntrada || '-',
+                    v.operadorSaida || '-',
+                    v.status
+                ]);
 
                 doc.autoTable({
-                    head: [['Nome', 'CPF', 'Tipo', 'Placa', 'Destino', 'Entrada', 'Saída', 'Status']],
+                    head: [['Nome', 'CPF', 'Tipo', 'Placa', 'Cor', 'Destino', 'Entrada', 'Saída', 'Op. Entrada', 'Op. Saída', 'Status']],
                     body: tableData,
-                    startY: 42,
-                    styles: { 
-                        fontSize: 7,
-                        cellPadding: 2
-                    },
-                    headStyles: {
-                        fillColor: [76, 119, 153],
-                        fontStyle: 'bold'
-                    },
-                    alternateRowStyles: {
-                        fillColor: [245, 245, 245]
-                    },
-                    columnStyles: {
-                        0: { cellWidth: 35 },
-                        1: { cellWidth: 25 },
-                        2: { cellWidth: 20 },
-                        3: { cellWidth: 18 },
-                        4: { cellWidth: 35 },
-                        5: { cellWidth: 25 },
-                        6: { cellWidth: 25 },
-                        7: { cellWidth: 15 }
-                    }
+                    startY: 35,
+                    styles: { fontSize: 7, cellPadding: 1.5 },
+                    headStyles: { fillColor: [76, 119, 153], fontStyle: 'bold' },
+                    alternateRowStyles: { fillColor: [245, 245, 245] }
                 });
 
-                // Rodapé
                 const pageCount = doc.internal.getNumberOfPages();
                 for (let i = 1; i <= pageCount; i++) {
                     doc.setPage(i);
                     doc.setFontSize(8);
-                    doc.setFont(undefined, 'normal');
-                    doc.text('Página ' + i + ' de ' + pageCount, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+                    doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
                 }
 
                 doc.save('zecure-relatorio-' + Date.now() + '.pdf');
@@ -1113,39 +2123,10 @@
             }
         }
 
-        // ========== LOGIN/CONFIG ==========
-        function doLogin() {
-            const user = document.getElementById('loginUser').value;
-            const pass = document.getElementById('loginPass').value;
-
-            if (user === config.username && pass === config.password) {
-                sessionStorage.setItem('zecure_auth', 'true');
-                isAuthenticated = true;
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('configSection').style.display = 'block';
-                loadConfigForm();
-            } else {
-                alert('❌ Usuário ou senha incorretos!');
-            }
-        }
-
-        function logout() {
-            if (confirm('Deseja realmente sair?')) {
-                sessionStorage.removeItem('zecure_auth');
-                isAuthenticated = false;
-                document.getElementById('loginSection').style.display = 'flex';
-                document.getElementById('configSection').style.display = 'none';
-                
-                // Limpa campos de login
-                document.getElementById('loginUser').value = '';
-                document.getElementById('loginPass').value = '';
-            }
-        }
-
+        // ========== CONFIG ==========
         function loadConfigForm() {
             document.getElementById('webAppUrl').value = config.webAppUrl;
             document.getElementById('apiPassword').value = config.apiPassword;
-            document.getElementById('newUsername').value = config.username;
             updateSyncStatus();
         }
 
@@ -1165,43 +2146,26 @@
                 const response = await fetch(url, {
                     method: 'GET',
                     cache: 'no-cache',
-                    headers: {
-                        'Accept': 'application/json'
-                    }
+                    headers: { 'Accept': 'application/json' }
                 });
                 
                 const text = await response.text();
-                
                 hideLoading();
                 
                 try {
                     const result = JSON.parse(text);
                     
                     if (result.success) {
-                        alert('✅ Conexão bem-sucedida!\n\n' + 
-                              'Apps Script está funcionando corretamente.\n' + 
-                              'Residentes encontrados: ' + (result.data ? result.data.length : 0));
+                        alert('✅ Conexão bem-sucedida!\n\nApps Script funcionando.\nResidentes: ' + (result.data ? result.data.length : 0));
                     } else {
-                        alert('❌ Erro na API: ' + (result.error || 'Falha desconhecida') + '\n\n' +
-                              'Verifique:\n' +
-                              '1. Senha da API está correta\n' +
-                              '2. Apps Script tem as abas corretas no Sheets');
+                        alert('❌ Erro: ' + (result.error || 'Falha desconhecida'));
                     }
                 } catch (e) {
-                    alert('❌ Resposta inválida da API.\n\n' +
-                          'Resposta recebida: ' + text.substring(0, 200) + '...\n\n' +
-                          'Verifique:\n' +
-                          '1. Apps Script está implantado como Web App\n' +
-                          '2. Acesso definido como "Qualquer pessoa"\n' +
-                          '3. URL está completa e correta');
+                    alert('❌ Resposta inválida da API.\n\nVerifique a configuração do Apps Script.');
                 }
             } catch (error) {
                 hideLoading();
-                alert('❌ Erro de conexão:\n\n' + error.message + '\n\n' +
-                      'Verifique:\n' +
-                      '1. URL está correta e completa\n' +
-                      '2. Apps Script está implantado\n' +
-                      '3. Você tem conexão com a internet');
+                alert('❌ Erro de conexão:\n\n' + error.message);
             }
         }
 
@@ -1210,7 +2174,7 @@
             const apiPassword = document.getElementById('apiPassword').value.trim();
             
             if (webAppUrl && !webAppUrl.startsWith('https://script.google.com/')) {
-                alert('⚠️ URL inválida! Deve começar com: https://script.google.com/');
+                alert('⚠️ URL inválida!');
                 return;
             }
             
@@ -1222,40 +2186,13 @@
             useLocalStorage = !config.webAppUrl || !config.apiPassword;
             updateSyncStatus();
             
-            alert('✅ Configurações salvas com sucesso!');
+            alert('✅ Configurações salvas!');
             
             if (!useLocalStorage) {
-                // Limpa caches e recarrega dados
                 cacheResidents = { data: null, timestamp: 0 };
                 cacheVisitors = { data: null, timestamp: 0 };
                 loadResidentsFromAPI();
                 loadVisitorsFromAPI();
-            }
-        }
-
-        function updateCredentials() {
-            const newUsername = document.getElementById('newUsername').value.trim();
-            const newPassword = document.getElementById('newPassword').value.trim();
-            
-            if (!newUsername || !newPassword) {
-                alert('⚠️ Preencha usuário e senha!');
-                return;
-            }
-            
-            if (newPassword.length < 6) {
-                alert('⚠️ A senha deve ter pelo menos 6 caracteres!');
-                return;
-            }
-            
-            if (confirm('Confirma alteração das credenciais de acesso?\n\nUsuário: ' + newUsername)) {
-                config.username = newUsername;
-                config.password = newPassword;
-                
-                localStorage.setItem('zecure_config', JSON.stringify(config));
-                
-                alert('✅ Credenciais atualizadas com sucesso!\n\nFaça login novamente com as novas credenciais.');
-                
-                logout();
             }
         }
 
@@ -1272,10 +2209,9 @@
         // ========== CLEANUP ==========
         window.addEventListener('beforeunload', function() {
             if (videoStream) {
-                videoStream.getTracks().forEach(function(track) {
-                    track.stop();
-                });
+                videoStream.getTracks().forEach(track => track.stop());
             }
+            stopMonitoringAutoRefresh();
         });
 
         document.addEventListener('click', function(e) {
@@ -1283,15 +2219,6 @@
                 document.getElementById('autocompleteList').classList.remove('show');
             }
         });
-
-        // ========== SERVICE WORKER (PWA - OPCIONAL) ==========
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                // Descomente para ativar PWA
-                // navigator.serviceWorker.register('/sw.js');
-            });
-        }
     </script>
 </body>
 </html>
-
