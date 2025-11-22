@@ -652,18 +652,6 @@
             color: #666;
         }
 
-        .similarity-badge {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: var(--success);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 0.7em;
-            font-weight: 700;
-        }
-
         .logo-preview {
             width: 100px;
             height: 100px;
@@ -719,9 +707,9 @@
                         <span>👤</span>
                         <span id="operatorNameDisplay"></span>
                     </div>
-                    <div class="sync-status" id="syncStatus">
+                    <div class="sync-status online" id="syncStatus">
                         <div class="sync-dot"></div>
-                        <span>Local</span>
+                        <span>Online</span>
                     </div>
                 </div>
             </div>
@@ -928,8 +916,8 @@
                             <input type="date" id="dateEnd">
                         </div>
                     </div>
-                    <button class="btn btn-info" onclick="applyDateFilter()">🔄 Limpar Filtro</button>
-                    <button class="btn btn-outline" onclick="clearDateFilter()">🔍 Filtrar</button>
+                    <button class="btn btn-info" onclick="applyDateFilter()">🔍 Filtrar</button>
+                    <button class="btn btn-outline" onclick="clearDateFilter()">🔄 Limpar Filtro</button>
                 </div>
 
                 <div class="card">
@@ -967,24 +955,10 @@
                 </div>
 
                 <div class="card">
-                    <div class="card-title">🔗 Apps Script API</div>
-                    <div class="form-group">
-                        <label>URL do Web App</label>
-                        <input type="text" id="webAppUrl" placeholder="https://script.google.com/macros/s/...">
-                    </div>
-                    <div class="form-group">
-                        <label>Senha da API</label>
-                        <input type="password" id="apiPassword" placeholder="zecure@2024@api">
-                    </div>
-                    <button class="btn btn-success" onclick="testConnection()">🧪 Testar Conexão</button>
-                    <button class="btn btn-primary" onclick="saveConfig()">💾 Salvar Configurações</button>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">ℹ️ Modo Atual</div>
+                    <div class="card-title">ℹ️ Status do Sistema</div>
                     <p style="font-size: 0.85em; color: var(--gray); line-height: 1.6;">
-                        <strong id="modeStatus">💾 Modo Local (LocalStorage)</strong><br>
-                        <span id="modeDescription">Os dados estão sendo salvos apenas no navegador.</span>
+                        <strong id="modeStatus">☁️ Modo Online (Google Sheets)</strong><br>
+                        <span id="modeDescription">Sistema conectado à API. Dados sincronizados automaticamente.</span>
                     </p>
                 </div>
             </div>
@@ -1052,6 +1026,13 @@
     </div>
 
     <script>
+        // ========== CONFIGURAÇÃO DA API (HARDCODED) ==========
+        // ⚠️ ATENÇÃO: Altere apenas estas linhas para configurar a API
+        const API_CONFIG = {
+            webAppUrl: 'https://script.google.com/macros/s/AKfycbz8m7VQ8-102h_8BoTxDrYgqmn_pyEqbkjm8L6tkgKyl4vKpnau1I_I57atUMHuSV1g/exec',
+            apiPassword: 'zecure@2024@api' // Altere para sua senha personalizada
+        };
+
         // ========== VARIÁVEIS GLOBAIS ==========
         let videoStream = null;
         let capturedPhoto = null;
@@ -1065,18 +1046,12 @@
         const CACHE_DURATION = 10000;
         let cacheVisitors = { data: null, timestamp: 0 };
         let cacheResidents = { data: null, timestamp: 0 };
-        
-        let config = JSON.parse(localStorage.getItem('zecure_config')) || {
-            webAppUrl: '',
-            apiPassword: ''
-        };
 
         let customization = JSON.parse(localStorage.getItem('zecure_customization')) || {
             systemName: 'ZECURE',
             logoImage: null
         };
 
-        let useLocalStorage = !config.webAppUrl || !config.apiPassword;
         let monitoringInterval = null;
 
         // ========== PERSONALIZAÇÃO ==========
@@ -1091,15 +1066,12 @@
 
             // Atualiza logo
             if (logoImage) {
-                // Logo no cabeçalho
                 const headerLogo = document.getElementById('headerLogo');
                 headerLogo.innerHTML = `<img src="${logoImage}" alt="${systemName}">`;
 
-                // Logo na tela de login
                 const loginLogo = document.getElementById('loginLogo');
                 loginLogo.innerHTML = `<img src="${logoImage}" alt="${systemName}" style="width: 100px; height: 100px; border-radius: 12px; object-fit: cover;">`;
             } else {
-                // Restaura emoji padrão
                 document.getElementById('headerLogo').textContent = '🔐';
                 document.getElementById('loginLogo').textContent = '🔐';
             }
@@ -1189,7 +1161,6 @@
             applyCustomization();
             setupCPFMask();
             loadData();
-            updateSyncStatus();
         }
 
         function changeOperator() {
@@ -1240,61 +1211,18 @@
 
         // ========== STORAGE ==========
         function loadData() {
-            if (useLocalStorage) {
-                visitorsData = JSON.parse(localStorage.getItem('zecure_visitors')) || [];
-                filteredVisitorsData = visitorsData;
-                residentsData = JSON.parse(localStorage.getItem('zecure_residents')) || [
-                    {nome: 'João Silva', endereco: 'Rua das Flores, 123'},
-                    {nome: 'Maria Santos', endereco: 'Av. Principal, 456'},
-                    {nome: 'Pedro Alves', endereco: 'Rua do Bosque, 789'}
-                ];
-                updateStats();
-            } else {
-                loadVisitorsFromAPI();
-                loadResidentsFromAPI();
-            }
-        }
-
-        function saveVisitorsLocal() {
-            localStorage.setItem('zecure_visitors', JSON.stringify(visitorsData));
-        }
-
-        function updateSyncStatus() {
-            const status = document.getElementById('syncStatus');
-            const modeStatus = document.getElementById('modeStatus');
-            const modeDescription = document.getElementById('modeDescription');
-            
-            if (useLocalStorage) {
-                status.classList.remove('online');
-                status.querySelector('span').textContent = 'Local';
-                
-                if (modeStatus) {
-                    modeStatus.textContent = '💾 Modo Local (LocalStorage)';
-                    modeDescription.textContent = 'Os dados estão sendo salvos apenas no navegador.';
-                }
-            } else {
-                status.classList.add('online');
-                status.querySelector('span').textContent = 'Online';
-                
-                if (modeStatus) {
-                    modeStatus.textContent = '☁️ Modo Online (Google Sheets)';
-                    modeDescription.textContent = 'Os dados estão sincronizados com Google Sheets.';
-                }
-            }
+            loadVisitorsFromAPI();
+            loadResidentsFromAPI();
         }
 
         // ========== API ==========
         async function chamarAPI(action, data, tentativa = 1) {
             const MAX_TENTATIVAS = 3;
-            
-            if (useLocalStorage) {
-                throw new Error('API não configurada. Configure na aba Config.');
-            }
 
             try {
                 const params = new URLSearchParams({
                     action: action,
-                    senha: config.apiPassword,
+                    senha: API_CONFIG.apiPassword,
                     _: Date.now()
                 });
                 
@@ -1309,7 +1237,7 @@
                     }
                 }
                 
-                const url = config.webAppUrl + '?' + params.toString();
+                const url = API_CONFIG.webAppUrl + '?' + params.toString();
                 
                 const response = await fetch(url, {
                     method: 'GET',
@@ -1397,7 +1325,6 @@
             document.getElementById(screens[screen]).classList.add('active');
             event.target.closest('.nav-item').classList.add('active');
             
-            // Para câmera ao sair da tela de cadastro
             if (screen !== 'cadastro') {
                 closeCamera();
             }
@@ -1414,7 +1341,6 @@
             } else if (screen === 'saida') {
                 loadActiveVisitorsForExit();
             } else if (screen === 'config') {
-                loadConfigForm();
                 loadCustomizationForm();
             }
         }
@@ -1422,13 +1348,11 @@
         // ========== CÂMERA ==========
         async function openCamera() {
             try {
-                // Mostra container da câmera
                 document.getElementById('cameraContainer').style.display = 'block';
                 document.getElementById('cameraControls').style.display = 'grid';
                 document.getElementById('openCameraBtn').style.display = 'none';
                 document.getElementById('photoPreviewContainer').style.display = 'none';
                 
-                // Inicia câmera
                 const video = document.getElementById('video');
                 if (videoStream) {
                     videoStream.getTracks().forEach(track => track.stop());
@@ -1480,7 +1404,7 @@
             } catch (error) {
                 console.error('Erro ao alternar câmera:', error);
                 alert('⚠️ Erro ao alternar câmera.');
-                        }
+            }
         }
 
         function takePhoto() {
@@ -1500,10 +1424,8 @@
             preview.style.display = 'block';
             video.style.display = 'none';
             
-            // Para a câmera após captura
             closeCamera();
             
-            // Mostra botão de trocar foto
             document.getElementById('changePhotoBtn').style.display = 'block';
             document.getElementById('cameraControls').style.display = 'none';
             document.getElementById('cameraContainer').style.display = 'block';
@@ -1514,7 +1436,6 @@
             document.getElementById('video').style.display = 'block';
             capturedPhoto = null;
             
-            // Reinicia câmera
             openCamera();
         }
 
@@ -1577,23 +1498,13 @@
             try {
                 let visitor = null;
                 
-                if (useLocalStorage) {
-                    const visitors = visitorsData.filter(v => 
-                        v.cpf.replace(/[^\d]/g, '') === cpfLimpo
-                    );
-                    
-                    if (visitors.length > 0) {
-                        visitor = visitors[visitors.length - 1];
+                try {
+                    const result = await chamarAPI('buscarPorCPF', cpf);
+                    if (result.data && result.data.length > 0) {
+                        visitor = result.data[result.data.length - 1];
                     }
-                } else {
-                    try {
-                        const result = await chamarAPI('buscarPorCPF', cpf);
-                        if (result.data && result.data.length > 0) {
-                            visitor = result.data[result.data.length - 1];
-                        }
-                    } catch (error) {
-                        console.error('Erro ao buscar CPF na API:', error);
-                    }
+                } catch (error) {
+                    console.error('Erro ao buscar CPF na API:', error);
                 }
                 
                 hideLoading();
@@ -1609,7 +1520,6 @@
         }
 
         function autoFillVisitorData(visitor) {
-            // Preenche os campos
             document.getElementById('fullName').value = visitor.nome;
             document.getElementById('visitorType').value = visitor.tipo;
             document.getElementById('company').value = visitor.empresa || '';
@@ -1617,7 +1527,6 @@
             document.getElementById('vehicleColor').value = visitor.cor || '';
             document.getElementById('vehicleModel').value = visitor.modelo || '';
             
-            // Carrega foto antiga se existir
             if (visitor.foto) {
                 capturedPhoto = visitor.foto;
                 document.getElementById('loadedPhoto').src = visitor.foto;
@@ -1698,19 +1607,12 @@
 
             let filtered = [];
             
-            if (useLocalStorage) {
-                filtered = residentsData.filter(r => 
-                    r.nome.toLowerCase().includes(query.toLowerCase()) ||
-                    r.endereco.toLowerCase().includes(query.toLowerCase())
-                );
-            } else {
-                try {
-                    const result = await chamarAPI('buscarResidentePorNome', query);
-                    filtered = result.data || [];
-                } catch (error) {
-                    console.error('Erro ao buscar residente:', error);
-                    return;
-                }
+            try {
+                const result = await chamarAPI('buscarResidentePorNome', query);
+                filtered = result.data || [];
+            } catch (error) {
+                console.error('Erro ao buscar residente:', error);
+                return;
             }
 
             if (filtered.length === 0) {
@@ -1741,38 +1643,25 @@
             try {
                 showLoading('Registrando entrada...');
                 
-                if (useLocalStorage) {
-                    const agora = new Date();
-                    record.entrada = agora.toLocaleString('pt-BR');
-                    record.saida = '';
-                    record.status = 'ATIVO';
-                    record.operadorEntrada = currentOperator;
-                    record.operadorSaida = '';
-                    visitorsData.push(record);
-                    saveVisitorsLocal();
-                    
-                    hideLoading();
-                } else {
-                    await chamarAPI('registrarEntrada', {
-                        nome: record.nome,
-                        cpf: record.cpf,
-                        tipo: record.tipo,
-                        empresa: record.empresa,
-                        placa: record.placa,
-                        cor: record.cor,
-                        modelo: record.modelo,
-                        destino: record.destino,
-                        foto: record.foto,
-                        observacao: record.observacao,
-                        operador: currentOperator
-                    });
-                    
-                    hideLoading();
-                    
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    cacheVisitors = { data: null, timestamp: 0 };
-                    await loadVisitorsFromAPI();
-                }
+                await chamarAPI('registrarEntrada', {
+                    nome: record.nome,
+                    cpf: record.cpf,
+                    tipo: record.tipo,
+                    empresa: record.empresa,
+                    placa: record.placa,
+                    cor: record.cor,
+                    modelo: record.modelo,
+                    destino: record.destino,
+                    foto: record.foto,
+                    observacao: record.observacao,
+                    operador: currentOperator
+                });
+                
+                hideLoading();
+                
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                cacheVisitors = { data: null, timestamp: 0 };
+                await loadVisitorsFromAPI();
                 
             } catch (error) {
                 hideLoading();
@@ -1818,7 +1707,6 @@
                 
                 alert('✅ Entrada registrada com sucesso!\n\nOperador: ' + currentOperator);
                 
-                // Limpa todos os estados visuais
                 this.reset();
                 capturedPhoto = null;
                 closeCamera();
@@ -1840,10 +1728,8 @@
             try {
                 showLoading('Carregando monitoramento...');
                 
-                if (!useLocalStorage) {
-                    cacheVisitors = { data: null, timestamp: 0 };
-                    await loadVisitorsFromAPI();
-                }
+                cacheVisitors = { data: null, timestamp: 0 };
+                await loadVisitorsFromAPI();
                 
                 hideLoading();
                 displayMonitoring();
@@ -2000,15 +1886,8 @@
             try {
                 showLoading('Buscando por nome...');
                 
-                let results;
-                if (useLocalStorage) {
-                    results = visitorsData.filter(v => 
-                        v.status === 'ATIVO' && v.nome.toLowerCase().includes(nome.toLowerCase())
-                    );
-                } else {
-                    const result = await chamarAPI('buscarPorNome', nome);
-                    results = result.data || [];
-                }
+                const result = await chamarAPI('buscarPorNome', nome);
+                const results = result.data || [];
                 
                 hideLoading();
                 displayExitResults(results);
@@ -2028,17 +1907,8 @@
             try {
                 showLoading('Buscando por CPF...');
                 
-                let results;
-                if (useLocalStorage) {
-                    const cpfLimpo = cpf.replace(/[^\d]/g, '');
-                    results = visitorsData.filter(v => {
-                        const cpfVisitante = v.cpf.replace(/[^\d]/g, '');
-                        return v.status === 'ATIVO' && cpfVisitante.includes(cpfLimpo);
-                    });
-                } else {
-                    const result = await chamarAPI('buscarPorCPF', cpf);
-                    results = result.data || [];
-                }
+                const result = await chamarAPI('buscarPorCPF', cpf);
+                const results = result.data || [];
                 
                 hideLoading();
                 displayExitResults(results);
@@ -2058,15 +1928,8 @@
             try {
                 showLoading('Buscando por placa...');
                 
-                let results;
-                if (useLocalStorage) {
-                    results = visitorsData.filter(v => 
-                        v.status === 'ATIVO' && v.placa && v.placa.toUpperCase().includes(plate.toUpperCase())
-                    );
-                } else {
-                    const result = await chamarAPI('buscarPorPlaca', plate);
-                    results = result.data || [];
-                }
+                const result = await chamarAPI('buscarPorPlaca', plate);
+                const results = result.data || [];
                 
                 hideLoading();
                 displayExitResults(results);
@@ -2104,14 +1967,8 @@
             showLoading('Buscando visitantes ativos...');
             
             try {
-                let results;
-                
-                if (useLocalStorage) {
-                    results = visitorsData.filter(v => v.status === 'ATIVO');
-                } else {
-                    const result = await chamarAPI('buscarAtivos');
-                    results = result.data || [];
-                }
+                const result = await chamarAPI('buscarAtivos');
+                const results = result.data || [];
                 
                 hideLoading();
                 
@@ -2190,27 +2047,14 @@
             try {
                 showLoading('Registrando saída...');
                 
-                if (useLocalStorage) {
-                    const visitor = visitorsData.find(v => 
-                        v.status === 'ATIVO' && (v.cpf === cpf || v.placa === placa)
-                    );
-                    
-                    if (visitor) {
-                        visitor.saida = new Date().toLocaleString('pt-BR');
-                        visitor.status = 'INATIVO';
-                        visitor.operadorSaida = currentOperator;
-                        saveVisitorsLocal();
-                    }
-                } else {
-                    await chamarAPI('registrarSaida', {
-                        cpf: cpf,
-                        placa: placa,
-                        operador: currentOperator
-                    });
-                    
-                    cacheVisitors = { data: null, timestamp: 0 };
-                    await loadVisitorsFromAPI();
-                }
+                await chamarAPI('registrarSaida', {
+                    cpf: cpf,
+                    placa: placa,
+                    operador: currentOperator
+                });
+                
+                cacheVisitors = { data: null, timestamp: 0 };
+                await loadVisitorsFromAPI();
                 
                 hideLoading();
                 
@@ -2231,10 +2075,8 @@
 
         async function loadActiveVisitorsForExit() {
             try {
-                if (!useLocalStorage) {
-                    cacheVisitors = { data: null, timestamp: 0 };
-                    await loadVisitorsFromAPI();
-                }
+                cacheVisitors = { data: null, timestamp: 0 };
+                await loadVisitorsFromAPI();
             } catch (error) {
                 console.error('Erro ao carregar ativos:', error);
             }
@@ -2316,10 +2158,8 @@
             try {
                 showLoading('Carregando relatório...');
                 
-                if (!useLocalStorage) {
-                    cacheVisitors = { data: null, timestamp: 0 };
-                    await loadVisitorsFromAPI();
-                }
+                cacheVisitors = { data: null, timestamp: 0 };
+                await loadVisitorsFromAPI();
                 
                 filteredVisitorsData = visitorsData;
                 
@@ -2442,79 +2282,6 @@
                 hideLoading();
                 console.error('Erro ao gerar PDF:', error);
                 alert('❌ Erro ao gerar PDF: ' + error.message);
-            }
-        }
-
-        // ========== CONFIG ==========
-        function loadConfigForm() {
-            document.getElementById('webAppUrl').value = config.webAppUrl;
-            document.getElementById('apiPassword').value = config.apiPassword;
-            updateSyncStatus();
-        }
-
-        async function testConnection() {
-            const webAppUrl = document.getElementById('webAppUrl').value;
-            const apiPassword = document.getElementById('apiPassword').value;
-
-            if (!webAppUrl || !apiPassword) {
-                alert('⚠️ Preencha a URL e a senha da API!');
-                return;
-            }
-
-            showLoading('Testando conexão...');
-
-            try {
-                const url = webAppUrl + '?action=listarResidentes&senha=' + encodeURIComponent(apiPassword) + '&_=' + Date.now();
-                const response = await fetch(url, {
-                    method: 'GET',
-                    cache: 'no-cache',
-                    headers: { 'Accept': 'application/json' }
-                });
-                
-                const text = await response.text();
-                hideLoading();
-                
-                try {
-                    const result = JSON.parse(text);
-                    
-                    if (result.success) {
-                        alert('✅ Conexão bem-sucedida!\n\nApps Script funcionando.\nResidentes: ' + (result.data ? result.data.length : 0));
-                    } else {
-                        alert('❌ Erro: ' + (result.error || 'Falha desconhecida'));
-                    }
-                } catch (e) {
-                    alert('❌ Resposta inválida da API.\n\nVerifique a configuração do Apps Script.');
-                }
-            } catch (error) {
-                hideLoading();
-                alert('❌ Erro de conexão:\n\n' + error.message);
-            }
-        }
-
-        function saveConfig() {
-            const webAppUrl = document.getElementById('webAppUrl').value.trim();
-            const apiPassword = document.getElementById('apiPassword').value.trim();
-            
-            if (webAppUrl && !webAppUrl.startsWith('https://script.google.com/')) {
-                alert('⚠️ URL inválida!');
-                return;
-            }
-            
-            config.webAppUrl = webAppUrl;
-            config.apiPassword = apiPassword;
-            
-            localStorage.setItem('zecure_config', JSON.stringify(config));
-            
-            useLocalStorage = !config.webAppUrl || !config.apiPassword;
-            updateSyncStatus();
-            
-            alert('✅ Configurações salvas!');
-            
-            if (!useLocalStorage) {
-                cacheResidents = { data: null, timestamp: 0 };
-                cacheVisitors = { data: null, timestamp: 0 };
-                loadResidentsFromAPI();
-                loadVisitorsFromAPI();
             }
         }
 
