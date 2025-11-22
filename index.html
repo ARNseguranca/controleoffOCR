@@ -84,6 +84,13 @@
             align-items: center;
             justify-content: center;
             font-size: 1.5em;
+            overflow: hidden;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .header-text h1 {
@@ -657,6 +664,22 @@
             font-weight: 700;
         }
 
+        .logo-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid var(--primary-light);
+            margin: 10px auto;
+            display: block;
+        }
+
+        .date-filter-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
         @media (min-width: 768px) {
             .content {
                 max-width: 600px;
@@ -669,8 +692,8 @@
     <!-- TELA DE LOGIN OPERADOR -->
     <div id="operatorLoginScreen" class="login-container">
         <div class="login-box">
-            <div class="logo-large">🔐</div>
-            <h2>ZECURE</h2>
+            <div class="logo-large" id="loginLogo">🔐</div>
+            <h2 id="loginTitle">ZECURE</h2>
             <p>Sistema de Controle de Acesso</p>
             <div class="form-group" style="text-align: left;">
                 <label>Nome do Operador *</label>
@@ -685,9 +708,9 @@
         <div class="header">
             <div class="header-content">
                 <div class="header-left">
-                    <div class="logo">🔐</div>
+                    <div class="logo" id="headerLogo">🔐</div>
                     <div class="header-text">
-                        <h1>ZECURE</h1>
+                        <h1 id="headerTitle">ZECURE</h1>
                         <p>Controle de Acesso</p>
                     </div>
                 </div>
@@ -710,16 +733,36 @@
                 <form id="accessForm">
                     <div class="card">
                         <div class="card-title">📸 Reconhecimento Facial</div>
-                        <div class="camera-container">
+                        
+                        <!-- Botão para abrir câmera (visível quando não há foto) -->
+                        <button type="button" id="openCameraBtn" class="btn btn-info" onclick="openCamera()" style="margin-bottom: 10px;">
+                            📷 Abrir Câmera
+                        </button>
+                        
+                        <!-- Container da câmera (oculto inicialmente) -->
+                        <div class="camera-container" id="cameraContainer" style="display: none;">
                             <video id="video" autoplay playsinline muted></video>
                             <img id="photoPreview" class="photo-preview" style="display:none;">
                             <canvas id="canvas" style="display:none;"></canvas>
                             <button type="button" class="flip-btn" onclick="flipCamera()">🔄</button>
                         </div>
-                        <div class="btn-group">
+                        
+                        <!-- Preview da foto (quando carregada do histórico ou capturada) -->
+                        <div id="photoPreviewContainer" style="display: none;">
+                            <img id="loadedPhoto" class="photo-preview" style="width: 100%; border-radius: 12px; margin-bottom: 10px;">
+                            <p style="text-align: center; font-size: 0.75em; color: var(--success); font-weight: 600; margin-bottom: 10px;">
+                                ✅ Foto carregada do histórico
+                            </p>
+                        </div>
+                        
+                        <div class="btn-group" id="cameraControls" style="display: none;">
                             <button type="button" class="btn btn-primary" onclick="takePhoto()">📷 Capturar</button>
                             <button type="button" class="btn btn-outline" onclick="resetPhoto()">🔄 Refazer</button>
                         </div>
+                        
+                        <button type="button" id="changePhotoBtn" class="btn btn-warning" onclick="changePhoto()" style="display: none; margin-top: 10px;">
+                            🔄 Trocar Foto
+                        </button>
                     </div>
 
                     <div class="card">
@@ -737,7 +780,7 @@
                             <select id="visitorType" required>
                                 <option value="">Selecione</option>
                                 <option>Visitante</option>
-                                                                <option>Prestador de Serviço</option>
+                                <option>Prestador de Serviço</option>
                                 <option>Transporte</option>
                                 <option>Hóspede</option>
                                 <option>Entregador</option>
@@ -874,6 +917,22 @@
                 </div>
 
                 <div class="card">
+                    <div class="card-title">📅 Filtrar por Período</div>
+                    <div class="date-filter-group">
+                        <div class="form-group">
+                            <label>Data Inicial</label>
+                            <input type="date" id="dateStart">
+                        </div>
+                        <div class="form-group">
+                            <label>Data Final</label>
+                            <input type="date" id="dateEnd">
+                        </div>
+                    </div>
+                    <button class="btn btn-info" onclick="applyDateFilter()">🔄 Limpar Filtro</button>
+                    <button class="btn btn-outline" onclick="clearDateFilter()">🔍 Filtrar</button>
+                </div>
+
+                <div class="card">
                     <button class="btn btn-primary" onclick="downloadPDF()">📄 Exportar PDF</button>
                 </div>
 
@@ -888,6 +947,23 @@
                         Logado como: <strong id="configOperatorName"></strong>
                     </p>
                     <button class="btn btn-warning" onclick="changeOperator()">🔄 Trocar Operador</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎨 Personalização</div>
+                    <div class="form-group">
+                        <label>Nome do Sistema</label>
+                        <input type="text" id="systemName" placeholder="Ex: ZECURE" maxlength="20">
+                        <small style="font-size: 0.75em; color: var(--gray);">Nome exibido no cabeçalho e tela de login</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Logo do Sistema</label>
+                        <input type="file" id="logoUpload" accept="image/*" onchange="previewLogo(this)">
+                        <small style="font-size: 0.75em; color: var(--gray);">Formatos: PNG, JPG (recomendado: 200x200px)</small>
+                    </div>
+                    <img id="logoPreviewImg" class="logo-preview" style="display: none;">
+                    <button class="btn btn-success" onclick="saveCustomization()">💾 Salvar Personalização</button>
+                    <button class="btn btn-outline" onclick="resetCustomization()">🔄 Restaurar Padrão</button>
                 </div>
 
                 <div class="card">
@@ -983,6 +1059,7 @@
         let detectedPlate = null;
         let residentsData = [];
         let visitorsData = [];
+        let filteredVisitorsData = [];
         let currentOperator = '';
         
         const CACHE_DURATION = 10000;
@@ -994,8 +1071,103 @@
             apiPassword: ''
         };
 
+        let customization = JSON.parse(localStorage.getItem('zecure_customization')) || {
+            systemName: 'ZECURE',
+            logoImage: null
+        };
+
         let useLocalStorage = !config.webAppUrl || !config.apiPassword;
         let monitoringInterval = null;
+
+        // ========== PERSONALIZAÇÃO ==========
+        function applyCustomization() {
+            const systemName = customization.systemName || 'ZECURE';
+            const logoImage = customization.logoImage;
+
+            // Atualiza nome do sistema
+            document.getElementById('headerTitle').textContent = systemName;
+            document.getElementById('loginTitle').textContent = systemName;
+            document.title = `${systemName} - Sistema de Controle de Acesso`;
+
+            // Atualiza logo
+            if (logoImage) {
+                // Logo no cabeçalho
+                const headerLogo = document.getElementById('headerLogo');
+                headerLogo.innerHTML = `<img src="${logoImage}" alt="${systemName}">`;
+
+                // Logo na tela de login
+                const loginLogo = document.getElementById('loginLogo');
+                loginLogo.innerHTML = `<img src="${logoImage}" alt="${systemName}" style="width: 100px; height: 100px; border-radius: 12px; object-fit: cover;">`;
+            } else {
+                // Restaura emoji padrão
+                document.getElementById('headerLogo').textContent = '🔐';
+                document.getElementById('loginLogo').textContent = '🔐';
+            }
+        }
+
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('logoPreviewImg');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function saveCustomization() {
+            const systemName = document.getElementById('systemName').value.trim();
+            const logoUpload = document.getElementById('logoUpload');
+
+            if (systemName) {
+                customization.systemName = systemName;
+            }
+
+            if (logoUpload.files && logoUpload.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    customization.logoImage = e.target.result;
+                    localStorage.setItem('zecure_customization', JSON.stringify(customization));
+                    applyCustomization();
+                    alert('✅ Personalização salva com sucesso!');
+                };
+                reader.readAsDataURL(logoUpload.files[0]);
+            } else {
+                localStorage.setItem('zecure_customization', JSON.stringify(customization));
+                applyCustomization();
+                alert('✅ Personalização salva com sucesso!');
+            }
+        }
+
+        function resetCustomization() {
+            if (!confirm('Restaurar configurações padrão?')) return;
+
+            customization = {
+                systemName: 'ZECURE',
+                logoImage: null
+            };
+
+            localStorage.setItem('zecure_customization', JSON.stringify(customization));
+            
+            document.getElementById('systemName').value = 'ZECURE';
+            document.getElementById('logoUpload').value = '';
+            document.getElementById('logoPreviewImg').style.display = 'none';
+
+            applyCustomization();
+            alert('✅ Configurações restauradas!');
+        }
+
+        function loadCustomizationForm() {
+            document.getElementById('systemName').value = customization.systemName || 'ZECURE';
+            
+            if (customization.logoImage) {
+                const preview = document.getElementById('logoPreviewImg');
+                preview.src = customization.logoImage;
+                preview.style.display = 'block';
+            }
+        }
 
         // ========== LOGIN OPERADOR ==========
         function loginOperator() {
@@ -1014,7 +1186,7 @@
             document.getElementById('operatorNameDisplay').textContent = operatorName;
             document.getElementById('configOperatorName').textContent = operatorName;
             
-            initCamera();
+            applyCustomization();
             setupCPFMask();
             loadData();
             updateSyncStatus();
@@ -1028,6 +1200,8 @@
         }
 
         window.addEventListener('DOMContentLoaded', function() {
+            applyCustomization();
+            
             const savedOperator = sessionStorage.getItem('zecure_operator');
             if (savedOperator) {
                 document.getElementById('operatorName').value = savedOperator;
@@ -1068,6 +1242,7 @@
         function loadData() {
             if (useLocalStorage) {
                 visitorsData = JSON.parse(localStorage.getItem('zecure_visitors')) || [];
+                filteredVisitorsData = visitorsData;
                 residentsData = JSON.parse(localStorage.getItem('zecure_residents')) || [
                     {nome: 'João Silva', endereco: 'Rua das Flores, 123'},
                     {nome: 'Maria Santos', endereco: 'Av. Principal, 456'},
@@ -1181,7 +1356,8 @@
                 const result = await chamarAPI('listarResidentes');
                 residentsData = result.data || [];
                 cacheResidents = { data: residentsData, timestamp: now };
-            } catch (error) {                console.error('Erro ao carregar residentes:', error);
+            } catch (error) {
+                console.error('Erro ao carregar residentes:', error);
             }
         }
 
@@ -1189,6 +1365,7 @@
             const now = Date.now();
             if (cacheVisitors.data && (now - cacheVisitors.timestamp) < CACHE_DURATION) {
                 visitorsData = cacheVisitors.data;
+                filteredVisitorsData = visitorsData;
                 updateStats();
                 return;
             }
@@ -1196,6 +1373,7 @@
             try {
                 const result = await chamarAPI('listarTodos');
                 visitorsData = result.data || [];
+                filteredVisitorsData = visitorsData;
                 cacheVisitors = { data: visitorsData, timestamp: now };
                 updateStats();
             } catch (error) {
@@ -1219,6 +1397,11 @@
             document.getElementById(screens[screen]).classList.add('active');
             event.target.closest('.nav-item').classList.add('active');
             
+            // Para câmera ao sair da tela de cadastro
+            if (screen !== 'cadastro') {
+                closeCamera();
+            }
+            
             if (screen === 'monitoramento') {
                 loadMonitoring();
                 startMonitoringAutoRefresh();
@@ -1232,11 +1415,55 @@
                 loadActiveVisitorsForExit();
             } else if (screen === 'config') {
                 loadConfigForm();
+                loadCustomizationForm();
             }
         }
 
-        // ========== CÂMERA (CORRIGIDO - RESOLUÇÃO REDUZIDA) ==========
-        async function initCamera() {
+        // ========== CÂMERA ==========
+        async function openCamera() {
+            try {
+                // Mostra container da câmera
+                document.getElementById('cameraContainer').style.display = 'block';
+                document.getElementById('cameraControls').style.display = 'grid';
+                document.getElementById('openCameraBtn').style.display = 'none';
+                document.getElementById('photoPreviewContainer').style.display = 'none';
+                
+                // Inicia câmera
+                const video = document.getElementById('video');
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                }
+                videoStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: currentFacingMode, 
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    } 
+                });
+                video.srcObject = videoStream;
+                video.style.display = 'block';
+                document.getElementById('photoPreview').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Erro ao abrir câmera:', error);
+                alert('⚠️ Erro ao acessar câmera. Verifique as permissões.');
+                document.getElementById('openCameraBtn').style.display = 'block';
+                document.getElementById('cameraContainer').style.display = 'none';
+            }
+        }
+
+        function closeCamera() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+            document.getElementById('cameraContainer').style.display = 'none';
+            document.getElementById('cameraControls').style.display = 'none';
+        }
+
+        async function flipCamera() {
+            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            
             try {
                 const video = document.getElementById('video');
                 if (videoStream) {
@@ -1245,20 +1472,15 @@
                 videoStream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: currentFacingMode, 
-                        width: { ideal: 640 },   // ✅ REDUZIDO
-                        height: { ideal: 480 }    // ✅ REDUZIDO
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
                     } 
                 });
                 video.srcObject = videoStream;
             } catch (error) {
-                console.error('Erro câmera:', error);
-                alert('⚠️ Erro ao acessar câmera. Verifique as permissões.');
-            }
-        }
-
-        async function flipCamera() {
-            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-            await initCamera();
+                console.error('Erro ao alternar câmera:', error);
+                alert('⚠️ Erro ao alternar câmera.');
+                        }
         }
 
         function takePhoto() {
@@ -1266,67 +1488,204 @@
             const canvas = document.getElementById('canvas');
             const preview = document.getElementById('photoPreview');
             
-            // ✅ RESOLUÇÃO REDUZIDA
             canvas.width = 320;
             canvas.height = 240;
             
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, 320, 240);
             
-            // ✅ COMPRESSÃO MÁXIMA
-            capturedPhoto = canvas.toDataURL('image/jpeg', 0.1);
+            capturedPhoto = canvas.toDataURL('image/jpeg', 0.7);
             
             preview.src = capturedPhoto;
             preview.style.display = 'block';
             video.style.display = 'none';
+            
+            // Para a câmera após captura
+            closeCamera();
+            
+            // Mostra botão de trocar foto
+            document.getElementById('changePhotoBtn').style.display = 'block';
+            document.getElementById('cameraControls').style.display = 'none';
+            document.getElementById('cameraContainer').style.display = 'block';
         }
 
         function resetPhoto() {
             document.getElementById('photoPreview').style.display = 'none';
             document.getElementById('video').style.display = 'block';
             capturedPhoto = null;
+            
+            // Reinicia câmera
+            openCamera();
         }
 
-        // ========== CPF MASK ==========
-        // ========== CPF MASK + AUTO-BUSCA ==========
-    function setupCPFMask() {
-    const docInput = document.getElementById('document');
-    const searchCPFInput = document.getElementById('searchCPF');
-    
-    // Campo de entrada (cadastro)
-    if (docInput) {
-        docInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^\d]/g, '');
-            if (value.length <= 11) {
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                e.target.value = value;
-            }
-        });
-        
-        // ✅ NOVO: Busca automática quando CPF completo
-        docInput.addEventListener('blur', function(e) {
-            const cpf = e.target.value.replace(/[^\d]/g, '');
-            if (cpf.length === 11) {
-                searchVisitorByCPF(e.target.value);
-            }
-        });
-    }
-    
-    // Campo de busca (saída)
-    if (searchCPFInput) {
-        searchCPFInput.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/[^\d]/g, '');
-            if (value.length <= 11) {
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d)/, '$1.$2');
-                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                e.target.value = value;
-            }
-            });
+        function changePhoto() {
+            capturedPhoto = null;
+            document.getElementById('photoPreview').style.display = 'none';
+            document.getElementById('photoPreviewContainer').style.display = 'none';
+            document.getElementById('changePhotoBtn').style.display = 'none';
+            document.getElementById('cameraContainer').style.display = 'none';
+            document.getElementById('openCameraBtn').style.display = 'block';
         }
-    }
+
+        // ========== CPF MASK + AUTO-BUSCA ==========
+        function setupCPFMask() {
+            const docInput = document.getElementById('document');
+            const searchCPFInput = document.getElementById('searchCPF');
+            
+            if (docInput) {
+                docInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/[^\d]/g, '');
+                    if (value.length <= 11) {
+                        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                        e.target.value = value;
+                    }
+                });
+                
+                docInput.addEventListener('blur', function(e) {
+                    const cpf = e.target.value.replace(/[^\d]/g, '');
+                    if (cpf.length === 11) {
+                        searchVisitorByCPF(e.target.value);
+                    }
+                });
+            }
+            
+            if (searchCPFInput) {
+                searchCPFInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/[^\d]/g, '');
+                    if (value.length <= 11) {
+                        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                        e.target.value = value;
+                    }
+                });
+            }
+        }
+
+        // ========== BUSCA E AUTO-PREENCHIMENTO POR CPF ==========
+        async function searchVisitorByCPF(cpf) {
+            const cpfLimpo = cpf.replace(/[^\d]/g, '');
+            
+            if (cpfLimpo.length !== 11) {
+                return;
+            }
+            
+            showLoading('Buscando histórico...');
+            
+            try {
+                let visitor = null;
+                
+                if (useLocalStorage) {
+                    const visitors = visitorsData.filter(v => 
+                        v.cpf.replace(/[^\d]/g, '') === cpfLimpo
+                    );
+                    
+                    if (visitors.length > 0) {
+                        visitor = visitors[visitors.length - 1];
+                    }
+                } else {
+                    try {
+                        const result = await chamarAPI('buscarPorCPF', cpf);
+                        if (result.data && result.data.length > 0) {
+                            visitor = result.data[result.data.length - 1];
+                        }
+                    } catch (error) {
+                        console.error('Erro ao buscar CPF na API:', error);
+                    }
+                }
+                
+                hideLoading();
+                
+                if (visitor) {
+                    autoFillVisitorData(visitor);
+                }
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao buscar visitante:', error);
+            }
+        }
+
+        function autoFillVisitorData(visitor) {
+            // Preenche os campos
+            document.getElementById('fullName').value = visitor.nome;
+            document.getElementById('visitorType').value = visitor.tipo;
+            document.getElementById('company').value = visitor.empresa || '';
+            document.getElementById('vehiclePlate').value = visitor.placa || '';
+            document.getElementById('vehicleColor').value = visitor.cor || '';
+            document.getElementById('vehicleModel').value = visitor.modelo || '';
+            
+            // Carrega foto antiga se existir
+            if (visitor.foto) {
+                capturedPhoto = visitor.foto;
+                document.getElementById('loadedPhoto').src = visitor.foto;
+                document.getElementById('photoPreviewContainer').style.display = 'block';
+                document.getElementById('openCameraBtn').style.display = 'none';
+                document.getElementById('changePhotoBtn').style.display = 'block';
+                document.getElementById('cameraContainer').style.display = 'none';
+            }
+            
+            showAutoFillNotification(visitor);
+        }
+
+        function showAutoFillNotification(visitor) {
+            const oldNotification = document.querySelector('.autofill-notification');
+            if (oldNotification) {
+                oldNotification.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = 'autofill-notification';
+            notification.innerHTML = `
+                <div style="background: linear-gradient(135deg, #27AE60, #229954); color: white; padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3); animation: slideDown 0.3s;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="font-size: 1.5em;">✅</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; font-size: 0.9em; margin-bottom: 4px;">Dados Carregados do Histórico!</div>
+                            <div style="font-size: 0.75em; opacity: 0.95;">
+                                Nome: <strong>${visitor.nome}</strong><br>
+                                ${visitor.placa ? `Placa: <strong>${visitor.placa}</strong> (${visitor.cor || ''} ${visitor.modelo || ''})` : 'Sem veículo cadastrado anteriormente'}
+                            </div>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 1.2em;">×</button>
+                    </div>
+                    <div style="font-size: 0.7em; margin-top: 8px; opacity: 0.9;">
+                        💡 Confira os dados e atualize se necessário
+                    </div>
+                </div>
+            `;
+            
+            if (!document.querySelector('#autofillAnimation')) {
+                const style = document.createElement('style');
+                style.id = 'autofillAnimation';
+                style.textContent = `
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            const form = document.getElementById('accessForm');
+            form.insertBefore(notification, form.firstChild);
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            setTimeout(() => {
+                notification.style.transition = 'opacity 0.5s';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 10000);
+        }
 
         // ========== RESIDENTES ==========
         async function searchResidents(query) {
@@ -1376,131 +1735,6 @@
             document.getElementById('destination').value = `${nome} - ${endereco}`;
             document.getElementById('autocompleteList').classList.remove('show');
         }
-        
-        // ========== BUSCA E AUTO-PREENCHIMENTO POR CPF ==========
-async function searchVisitorByCPF(cpf) {
-    const cpfLimpo = cpf.replace(/[^\d]/g, '');
-    
-    // Só busca se CPF tiver 11 dígitos
-    if (cpfLimpo.length !== 11) {
-        return;
-    }
-    
-    showLoading('Buscando histórico...');
-    
-    try {
-        let visitor = null;
-        
-        if (useLocalStorage) {
-            // Busca no localStorage (pega o mais recente)
-            const visitors = visitorsData.filter(v => 
-                v.cpf.replace(/[^\d]/g, '') === cpfLimpo
-            );
-            
-            if (visitors.length > 0) {
-                // Pega o mais recente
-                visitor = visitors[visitors.length - 1];
-            }
-        } else {
-            // Busca na API
-            try {
-                const result = await chamarAPI('buscarPorCPF', cpf);
-                if (result.data && result.data.length > 0) {
-                    // Pega o mais recente (último do array)
-                    visitor = result.data[result.data.length - 1];
-                }
-            } catch (error) {
-                console.error('Erro ao buscar CPF na API:', error);
-            }
-        }
-        
-        hideLoading();
-        
-        if (visitor) {
-            autoFillVisitorData(visitor);
-        }
-        
-    } catch (error) {
-        hideLoading();
-        console.error('Erro ao buscar visitante:', error);
-    }
-}
-
-function autoFillVisitorData(visitor) {
-    // Preenche os campos automaticamente
-    document.getElementById('fullName').value = visitor.nome;
-    document.getElementById('visitorType').value = visitor.tipo;
-    document.getElementById('company').value = visitor.empresa || '';
-    document.getElementById('vehiclePlate').value = visitor.placa || '';
-    document.getElementById('vehicleColor').value = visitor.cor || '';
-    document.getElementById('vehicleModel').value = visitor.modelo || '';
-    
-    // Mostra notificação de dados carregados
-    showAutoFillNotification(visitor);
-}
-
-function showAutoFillNotification(visitor) {
-    // Remove notificação anterior se existir
-    const oldNotification = document.querySelector('.autofill-notification');
-    if (oldNotification) {
-        oldNotification.remove();
-    }
-    
-    // Cria nova notificação
-    const notification = document.createElement('div');
-    notification.className = 'autofill-notification';
-    notification.innerHTML = `
-        <div style="background: linear-gradient(135deg, #27AE60, #229954); color: white; padding: 12px 16px; border-radius: 12px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3); animation: slideDown 0.3s;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div style="font-size: 1.5em;">✅</div>
-                <div style="flex: 1;">
-                    <div style="font-weight: 700; font-size: 0.9em; margin-bottom: 4px;">Dados Carregados do Histórico!</div>
-                    <div style="font-size: 0.75em; opacity: 0.95;">
-                        Nome: <strong>${visitor.nome}</strong><br>
-                        ${visitor.placa ? `Placa: <strong>${visitor.placa}</strong> (${visitor.cor || ''} ${visitor.modelo || ''})` : 'Sem veículo cadastrado anteriormente'}
-                    </div>
-                </div>
-                <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 1.2em;">×</button>
-            </div>
-            <div style="font-size: 0.7em; margin-top: 8px; opacity: 0.9;">
-                💡 Confira os dados e atualize se necessário
-            </div>
-        </div>
-    `;
-    
-    // Adiciona animação CSS
-    if (!document.querySelector('#autofillAnimation')) {
-        const style = document.createElement('style');
-        style.id = 'autofillAnimation';
-        style.textContent = `
-            @keyframes slideDown {
-                from {
-                    opacity: 0;
-                    transform: translateY(-20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-    
-    // Insere no início do formulário
-    const form = document.getElementById('accessForm');
-    form.insertBefore(notification, form.firstChild);
-    
-    // Scroll suave para o topo
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // Remove automaticamente após 10 segundos
-    setTimeout(() => {
-        notification.style.transition = 'opacity 0.5s';
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 500);
-    }, 10000);
-}
 
         // ========== REGISTRAR ENTRADA ==========
         async function sendToAPI(record) {
@@ -1553,7 +1787,7 @@ function showAutoFillNotification(visitor) {
             e.preventDefault();
 
             if (!capturedPhoto) {
-                alert('⚠️ Capture uma foto para reconhecimento facial!');
+                alert('⚠️ Capture uma foto ou utilize a foto do histórico!');
                 return;
             }
             
@@ -1584,8 +1818,16 @@ function showAutoFillNotification(visitor) {
                 
                 alert('✅ Entrada registrada com sucesso!\n\nOperador: ' + currentOperator);
                 
+                // Limpa todos os estados visuais
                 this.reset();
-                resetPhoto();
+                capturedPhoto = null;
+                closeCamera();
+                document.getElementById('photoPreview').style.display = 'none';
+                document.getElementById('photoPreviewContainer').style.display = 'none';
+                document.getElementById('changePhotoBtn').style.display = 'none';
+                document.getElementById('openCameraBtn').style.display = 'block';
+                document.getElementById('cameraContainer').style.display = 'none';
+                
                 updateStats();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } catch (error) {
@@ -1663,7 +1905,7 @@ function showAutoFillNotification(visitor) {
             }
         }
 
-        // ========== LPR (CORRIGIDO) ==========
+        // ========== LPR ==========
         function openLPRScanner() {
             document.getElementById('lprModal').classList.add('active');
             detectedPlate = null;
@@ -1681,8 +1923,8 @@ function showAutoFillNotification(visitor) {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: 'environment',
-                        width: { ideal: 640 },   // ✅ REDUZIDO
-                        height: { ideal: 480 }   // ✅ REDUZIDO
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
                     } 
                 });
 
@@ -1701,12 +1943,11 @@ function showAutoFillNotification(visitor) {
                 await new Promise(resolve => setTimeout(resolve, 1000));
 
                 const canvas = document.createElement('canvas');
-                canvas.width = 640;   // ✅ REDUZIDO
-                canvas.height = 480;  // ✅ REDUZIDO
+                canvas.width = 640;
+                canvas.height = 480;
                 canvas.getContext('2d').drawImage(video, 0, 0, 640, 480);
 
-                // ✅ COMPRESSÃO MÁXIMA
-                const processedImage = canvas.toDataURL('image/jpeg', 0.1);
+                const processedImage = canvas.toDataURL('image/jpeg', 0.7);
                 document.getElementById('lprPreview').src = processedImage;
 
                 stream.getTracks().forEach(track => track.stop());
@@ -1849,7 +2090,7 @@ function showAutoFillNotification(visitor) {
             };
         }
 
-        // ========== BUSCA FACIAL (CORRIGIDO) ==========
+        // ========== BUSCA FACIAL ==========
         async function openFacialSearch() {
             document.getElementById('facialSearchModal').classList.add('active');
             await captureFaceForSearch();
@@ -1999,6 +2240,77 @@ function showAutoFillNotification(visitor) {
             }
         }
 
+        // ========== FILTRO DE DATA NO RELATÓRIO ==========
+        function applyDateFilter() {
+            const dateStart = document.getElementById('dateStart').value;
+            const dateEnd = document.getElementById('dateEnd').value;
+
+            if (!dateStart || !dateEnd) {
+                alert('⚠️ Selecione a data inicial e final!');
+                return;
+            }
+
+            const startDate = new Date(dateStart + 'T00:00:00');
+            const endDate = new Date(dateEnd + 'T23:59:59');
+
+            if (startDate > endDate) {
+                alert('❌ Data inicial não pode ser maior que a data final!');
+                return;
+            }
+
+            filteredVisitorsData = visitorsData.filter(v => {
+                if (!v.entrada) return false;
+
+                const [datePart] = v.entrada.split(' ');
+                const [day, month, year] = datePart.split('/');
+                const visitorDate = new Date(`${year}-${month}-${day}T00:00:00`);
+
+                return visitorDate >= startDate && visitorDate <= endDate;
+            });
+
+            updateStats();
+            displayFilteredReport();
+        }
+
+        function clearDateFilter() {
+            document.getElementById('dateStart').value = '';
+            document.getElementById('dateEnd').value = '';
+            filteredVisitorsData = visitorsData;
+            updateStats();
+            loadReport();
+        }
+
+        function displayFilteredReport() {
+            const list = document.getElementById('reportList');
+            
+            if (filteredVisitorsData.length === 0) {
+                list.innerHTML = `<div class="empty-state">
+                    <div class="icon">📭</div>
+                    <h3>Nenhum registro encontrado</h3>
+                    <p>Não há registros no período selecionado</p>
+                </div>`;
+                return;
+            }
+
+            list.innerHTML = filteredVisitorsData.slice().reverse().map(v => `
+                <div class="visitor-card">
+                    <img src="${v.foto || ''}" class="visitor-photo" onerror="this.style.display='none'">
+                    <div class="visitor-info">
+                        <div class="visitor-name">${v.nome}</div>
+                        <div class="visitor-detail">📄 ${v.cpf}</div>
+                        <div class="visitor-detail">🏢 ${v.empresa || v.tipo}</div>
+                        <div class="visitor-detail">🚗 ${v.placa || 'Sem placa'} ${v.cor ? '(' + v.cor + ' ' + v.modelo + ')' : ''}</div>
+                        <div class="visitor-detail">📍 ${v.destino}</div>
+                        <div class="visitor-detail">🕐 Entrada: ${v.entrada} (por ${v.operadorEntrada || 'N/A'})</div>
+                        ${v.saida ? `<div class="visitor-detail">🚪 Saída: ${v.saida} (por ${v.operadorSaida || 'N/A'})</div>` : ''}
+                    </div>
+                    <div style="text-align: center;">
+                        <span class="status-badge ${v.status === 'ATIVO' ? 'status-ativo' : 'status-inativo'}">${v.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         // ========== RELATÓRIO ==========
         async function loadReport() {
             try {
@@ -2008,6 +2320,8 @@ function showAutoFillNotification(visitor) {
                     cacheVisitors = { data: null, timestamp: 0 };
                     await loadVisitorsFromAPI();
                 }
+                
+                filteredVisitorsData = visitorsData;
                 
                 hideLoading();
                 updateStats();
@@ -2048,17 +2362,17 @@ function showAutoFillNotification(visitor) {
         }
 
         function updateStats() {
-            document.getElementById('totalVisitors').textContent = visitorsData.length;
+            document.getElementById('totalVisitors').textContent = filteredVisitorsData.length;
             
-            const activeCount = visitorsData.filter(v => v.status === 'ATIVO').length;
+            const activeCount = filteredVisitorsData.filter(v => v.status === 'ATIVO').length;
             document.getElementById('activeVisitors').textContent = activeCount;
             
-            const inactiveCount = visitorsData.filter(v => v.status === 'INATIVO').length;
+            const inactiveCount = filteredVisitorsData.filter(v => v.status === 'INATIVO').length;
             document.getElementById('inactiveVisitors').textContent = inactiveCount;
         }
 
         function downloadPDF() {
-            if (visitorsData.length === 0) {
+            if (filteredVisitorsData.length === 0) {
                 alert('⚠️ Não há registros para exportar!');
                 return;
             }
@@ -2069,19 +2383,27 @@ function showAutoFillNotification(visitor) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('l', 'mm', 'a4');
 
+                const systemName = customization.systemName || 'ZECURE';
+
                 doc.setFontSize(16);
                 doc.setFont(undefined, 'bold');
-                doc.text('ZECURE - Relatório de Controle de Acesso', 14, 15);
+                doc.text(`${systemName} - Relatório de Controle de Acesso`, 14, 15);
                 
                 doc.setFontSize(9);
                 doc.setFont(undefined, 'normal');
                 doc.text('Gerado em: ' + new Date().toLocaleString('pt-BR'), 14, 22);
                 
+                const dateStart = document.getElementById('dateStart').value;
+                const dateEnd = document.getElementById('dateEnd').value;
+                if (dateStart && dateEnd) {
+                    doc.text(`Período: ${dateStart} até ${dateEnd}`, 14, 27);
+                }
+                
                 doc.setFontSize(10);
                 doc.setFont(undefined, 'bold');
-                doc.text(`Total: ${visitorsData.length} | Ativos: ${visitorsData.filter(v => v.status === 'ATIVO').length} | Saídas: ${visitorsData.filter(v => v.status === 'INATIVO').length}`, 14, 29);
+                doc.text(`Total: ${filteredVisitorsData.length} | Ativos: ${filteredVisitorsData.filter(v => v.status === 'ATIVO').length} | Saídas: ${filteredVisitorsData.filter(v => v.status === 'INATIVO').length}`, 14, 33);
 
-                const tableData = visitorsData.map(v => [
+                const tableData = filteredVisitorsData.map(v => [
                     v.nome,
                     v.cpf,
                     v.tipo,
@@ -2098,7 +2420,7 @@ function showAutoFillNotification(visitor) {
                 doc.autoTable({
                     head: [['Nome', 'CPF', 'Tipo', 'Placa', 'Cor', 'Destino', 'Entrada', 'Saída', 'Op. Entrada', 'Op. Saída', 'Status']],
                     body: tableData,
-                    startY: 35,
+                    startY: 38,
                     styles: { fontSize: 7, cellPadding: 1.5 },
                     headStyles: { fillColor: [76, 119, 153], fontStyle: 'bold' },
                     alternateRowStyles: { fillColor: [245, 245, 245] }
@@ -2111,7 +2433,7 @@ function showAutoFillNotification(visitor) {
                     doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.getWidth() / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
                 }
 
-                doc.save('zecure-relatorio-' + Date.now() + '.pdf');
+                doc.save(`${systemName.toLowerCase()}-relatorio-${Date.now()}.pdf`);
                 
                 hideLoading();
                 alert('✅ PDF exportado com sucesso!');
