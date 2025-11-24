@@ -313,6 +313,11 @@
             color: var(--gray);
         }
 
+        .autocomplete-item.blacklist {
+            background: rgba(231, 76, 60, 0.1);
+            border-left: 4px solid #E74C3C;
+        }
+
         .camera-container {
             position: relative;
             width: 100%;
@@ -436,6 +441,17 @@
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(-20px); }
             to { opacity: 1; transform: translateX(0); }
+        }
+
+        .visitor-card.blacklist {
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(192, 57, 43, 0.15));
+            border: 2px solid #E74C3C;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0%, 100% { border-color: #E74C3C; }
+            50% { border-color: #C0392B; }
         }
 
         .visitor-photo {
@@ -660,6 +676,83 @@
             color: #666;
         }
 
+        .blacklist-badge {
+            background: linear-gradient(135deg, #E74C3C, #C0392B);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 700;
+            text-align: center;
+            white-space: nowrap;
+            animation: pulse-danger 2s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            50% { 
+                box-shadow: 0 0 0 8px rgba(231, 76, 60, 0);
+            }
+        }
+
+        .blacklist-warning {
+            background: linear-gradient(135deg, #E74C3C, #C0392B);
+            color: white;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 14px;
+            text-align: center;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+            animation: slideDown 0.5s;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .duplicate-warning {
+            background: linear-gradient(135deg, #F39C12, #E67E22);
+            color: white;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 14px;
+            text-align: center;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--gray-light);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .checkbox-wrapper:hover {
+            background: rgba(231, 76, 60, 0.1);
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #E74C3C;
+        }
+
+        .checkbox-wrapper label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
         .logo-preview {
             width: 100px;
             height: 100px;
@@ -689,11 +782,6 @@
         .csv-upload-zone:hover {
             background: white;
             border-color: var(--primary-dark);
-        }
-
-        .csv-upload-zone.dragging {
-            background: rgba(76, 119, 153, 0.1);
-            border-color: var(--success);
         }
 
         input[type="file"] {
@@ -812,6 +900,9 @@
         </div>
 
         <div class="content">
+            <!-- ALERTAS DINÂMICOS -->
+            <div id="dynamicAlerts" style="margin-bottom: 14px;"></div>
+
             <!-- TELA DE CADASTRO/ENTRADA -->
             <div id="cadastroScreen" class="screen active">
                 <form id="accessForm">
@@ -848,14 +939,26 @@
 
                     <div class="card">
                         <div class="card-title">👤 Dados Pessoais</div>
-                        <div class="form-group">
+                        
+                        <!-- BUSCA POR NOME -->
+                        <div class="form-group autocomplete-wrapper">
                             <label>Nome Completo *</label>
-                            <input type="text" id="fullName" required>
+                            <input 
+                                type="text" 
+                                id="fullName" 
+                                placeholder="Digite o nome..."
+                                autocomplete="off"
+                                oninput="searchVisitorByName(this.value)"
+                                required
+                            >
+                            <div class="autocomplete-list" id="nameAutocompleteList"></div>
                         </div>
+
                         <div class="form-group">
                             <label>CPF ou Passaporte *</label>
                             <input type="text" id="document" maxlength="14" placeholder="000.000.000-00" required>
                         </div>
+
                         <div class="form-group">
                             <label>Tipo *</label>
                             <select id="visitorType" required>
@@ -867,9 +970,23 @@
                                 <option>Entregador</option>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label>Empresa</label>
                             <input type="text" id="company">
+                        </div>
+
+                        <!-- LISTA NEGRA -->
+                        <div class="form-group">
+                            <div class="checkbox-wrapper" onclick="toggleBlacklist()">
+                                <input type="checkbox" id="blacklist" name="blacklist">
+                                <label for="blacklist">
+                                    <strong style="color: #E74C3C;">⚠️ Incluir na Lista Negra</strong><br>
+                                    <small style="color: var(--gray); font-size: 0.8em;">
+                                        Pessoa será marcada permanentemente e alertas aparecerão em futuras entradas
+                                    </small>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
@@ -1055,8 +1172,13 @@
                     </div>
                     <div class="form-group">
                         <label>Logo do Sistema</label>
-                        <input type="file" id="logoUpload" accept="image/*" onchange="previewLogo(this)">
-                        <small style="font-size: 0.75em; color: var(--gray);">Formatos: PNG, JPG (recomendado: 200x200px)</small>
+                        <button type="button" class="btn btn-outline" onclick="document.getElementById('logoUploadInput').click()" style="margin-bottom: 10px;">
+                            📁 Selecionar Logo
+                        </button>
+                        <input type="file" id="logoUploadInput" accept="image/*" onchange="previewLogo(this)" style="display: none;">
+                        <small style="font-size: 0.75em; color: var(--gray); display: block; margin-top: 5px;">
+                            Formatos: PNG, JPG (recomendado: 200x200px)
+                        </small>
                     </div>
                     <img id="logoPreviewImg" class="logo-preview" style="display: none;">
                     <button class="btn btn-success" onclick="saveCustomization()">💾 Salvar Personalização</button>
@@ -1085,10 +1207,6 @@
                     </div>
                     <input type="file" id="csvResidentesInput" accept=".csv" onchange="importResidentesCSV(this.files[0])">
                     <div id="residentesImportResult" class="import-result" style="display: none;"></div>
-                    
-                    <p style="font-size: 0.7em; color: var(--gray); margin-top: 10px; line-height: 1.5;">
-                        💡 <strong>Dica:</strong> Pode enviar CSV só com endereços. O sistema extrai o nome automaticamente.
-                    </p>
                 </div>
 
                 <div class="card">
@@ -1171,7 +1289,8 @@
                         💡 <strong>Dicas:</strong><br>
                         • Aproxime a câmera da placa<br>
                         • Mantenha boa iluminação<br>
-                        • Evite reflexos e sombras
+                        • Evite reflexos e sombras<br>
+                        • Use câmera traseira se possível
                     </p>
                 </div>
                 
@@ -1239,6 +1358,7 @@
         let searchNameTimer = null;
         let searchCPFTimer = null;
         let searchPlateTimer = null;
+        let searchNameAutocompleteTimer = null;
 
         let customization = JSON.parse(localStorage.getItem('zecure_customization')) || {
             systemName: 'ZECURE',
@@ -1247,6 +1367,214 @@
 
         let monitoringInterval = null;
         let monitoringUnsubscribe = null;
+
+        // ========== LISTA NEGRA ==========
+        function toggleBlacklist() {
+            const checkbox = document.getElementById('blacklist');
+            checkbox.checked = !checkbox.checked;
+        }
+
+        function showBlacklistWarning(nome) {
+            const alertsContainer = document.getElementById('dynamicAlerts');
+            
+            const existingWarning = alertsContainer.querySelector('.blacklist-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+            
+            const warning = document.createElement('div');
+            warning.className = 'blacklist-warning';
+            warning.innerHTML = `
+                <div style="font-size: 1.2em; margin-bottom: 8px;">⚠️ ALERTA DE LISTA NEGRA</div>
+                <div style="font-size: 0.9em;">
+                    <strong>${nome}</strong> está marcado(a) na lista negra.<br>
+                    Verifique antes de autorizar entrada.
+                </div>
+            `;
+            
+            alertsContainer.appendChild(warning);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ========== VERIFICAR ENTRADA DUPLICADA ==========
+        async function checkDuplicateEntry(cpf) {
+            if (!cpf) return false;
+            
+            const cpfLimpo = cpf.replace(/[^\d]/g, '');
+            
+            const activeVisitor = visitorsData.find(v => 
+                v.status === 'ATIVO' && 
+                v.cpf.replace(/[^\d]/g, '') === cpfLimpo
+            );
+            
+            if (activeVisitor) {
+                showDuplicateWarning(activeVisitor);
+                return true;
+            }
+            
+            try {
+                const snapshot = await db.collection('visitantes')
+                    .where('cpf', '==', cpf)
+                    .where('status', '==', 'ATIVO')
+                    .limit(1)
+                    .get();
+                
+                if (!snapshot.empty) {
+                    const visitor = {
+                        id: snapshot.docs[0].id,
+                        ...snapshot.docs[0].data(),
+                        entrada: snapshot.docs[0].data().entrada?.toDate().toLocaleString('pt-BR') || ''
+                    };
+                    showDuplicateWarning(visitor);
+                    return true;
+                }
+            } catch (error) {
+                console.error('Erro ao verificar entrada duplicada:', error);
+            }
+            
+            return false;
+        }
+
+        function showDuplicateWarning(visitor) {
+            const alertsContainer = document.getElementById('dynamicAlerts');
+            
+            const existingWarning = alertsContainer.querySelector('.duplicate-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+            
+            const warning = document.createElement('div');
+            warning.className = 'duplicate-warning';
+            warning.innerHTML = `
+                <div style="font-size: 1.2em; margin-bottom: 8px;">⚠️ ENTRADA DUPLICADA</div>
+                <div style="font-size: 0.9em;">
+                    <strong>${visitor.nome}</strong> já está ATIVO no sistema.<br>
+                    Entrada: ${visitor.entrada}<br><br>
+                    <strong>Registre a SAÍDA antes de fazer nova entrada.</strong>
+                </div>
+                <button class="btn btn-outline" onclick="goToExit('${visitor.cpf}')" style="margin-top: 12px; background: white;">
+                    🚪 Ir para Saída
+                </button>
+            `;
+            
+            alertsContainer.appendChild(warning);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goToExit(cpf) {
+            showScreen('saida');
+            document.getElementById('searchCPF').value = cpf;
+            searchByCPF(cpf);
+        }
+
+        // ========== BUSCA POR NOME COM AUTOCOMPLETE ==========
+        async function searchVisitorByName(name) {
+            const list = document.getElementById('nameAutocompleteList');
+            
+            if (!name || name.length < 2) {
+                list.classList.remove('show');
+                // Limpar alertas quando limpar o campo
+                document.getElementById('dynamicAlerts').innerHTML = '';
+                return;
+            }
+
+            clearTimeout(searchNameAutocompleteTimer);
+            
+            searchNameAutocompleteTimer = setTimeout(async () => {
+                console.log(`🔍 Buscando visitante por nome: "${name}"`);
+                
+                const nameLower = name.toLowerCase();
+                const localResults = visitorsData
+                    .filter(v => v.nome && v.nome.toLowerCase().includes(nameLower))
+                    .sort((a, b) => {
+                        const dateA = new Date(a.entrada);
+                        const dateB = new Date(b.entrada);
+                        return dateB - dateA;
+                    })
+                    .slice(0, 10);
+
+                if (localResults.length > 0) {
+                    displayNameAutocomplete(localResults, list);
+                    return;
+                }
+
+                try {
+                    const snapshot = await db.collection('visitantes')
+                        .orderBy('entrada', 'desc')
+                        .limit(50)
+                        .get();
+                    
+                    const allVisitors = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
+                    }));
+                    
+                    const filtered = allVisitors.filter(v => 
+                        v.nome && v.nome.toLowerCase().includes(nameLower)
+                    ).slice(0, 10);
+                    
+                    if (filtered.length > 0) {
+                        displayNameAutocomplete(filtered, list);
+                    } else {
+                        list.classList.remove('show');
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar por nome:', error);
+                }
+            }, 300);
+        }
+
+        function displayNameAutocomplete(results, list) {
+            list.innerHTML = results.map(v => {
+                const blacklistClass = v.blacklist ? 'blacklist' : '';
+                const blacklistBadge = v.blacklist ? '<span style="color: #E74C3C; font-weight: 700;"> ⚠️ LISTA NEGRA</span>' : '';
+                
+                // Escapar aspas simples no JSON
+                const visitorJson = JSON.stringify(v).replace(/'/g, "\'");
+                
+                return `<div class="autocomplete-item ${blacklistClass}" onclick='selectVisitorFromName(${visitorJson})'>
+                    <strong>${v.nome}${blacklistBadge}</strong>
+                    <small>CPF: ${v.cpf || 'N/A'} | Última entrada: ${v.entrada}</small>
+                </div>`;
+            }).join('');
+            
+            list.classList.add('show');
+        }
+
+        function selectVisitorFromName(visitor) {
+            console.log('✅ Visitante selecionado:', visitor);
+            
+            document.getElementById('fullName').value = visitor.nome;
+            document.getElementById('document').value = visitor.cpf || '';
+            document.getElementById('visitorType').value = visitor.tipo || '';
+            document.getElementById('company').value = visitor.empresa || '';
+            document.getElementById('vehiclePlate').value = visitor.placa || '';
+            document.getElementById('vehicleColor').value = visitor.cor || '';
+            document.getElementById('vehicleModel').value = visitor.modelo || '';
+            
+            if (visitor.blacklist) {
+                document.getElementById('blacklist').checked = true;
+                showBlacklistWarning(visitor.nome);
+            } else {
+                document.getElementById('blacklist').checked = false;
+            }
+            
+            if (visitor.fotoUrl) {
+                capturedPhoto = visitor.fotoUrl;
+                document.getElementById('loadedPhoto').src = visitor.fotoUrl;
+                document.getElementById('photoPreviewContainer').style.display = 'block';
+                document.getElementById('openCameraBtn').style.display = 'none';
+                document.getElementById('changePhotoBtn').style.display = 'block';
+                document.getElementById('cameraContainer').style.display = 'none';
+            }
+            
+            checkDuplicateEntry(visitor.cpf);
+            
+            document.getElementById('nameAutocompleteList').classList.remove('show');
+            
+            showAutoFillNotification(visitor);
+        }
 
         // ========== SISTEMA DE SENHA CONFIG ==========
         function getConfigPassword() {
@@ -1313,46 +1641,44 @@
             }
         });
 
-        // ========== IMPORTAÇÃO CSV ==========
+        // ========== IMPORTAÇÃO CSV (SIMPLIFICADA) ==========
         async function importVisitantesCSV(file) {
             if (!file) return;
 
+            console.log('📥 Iniciando importação de visitantes...');
             showLoading('Lendo CSV...');
 
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
+                encoding: 'UTF-8',
                 complete: async function(results) {
                     const data = results.data;
                     
                     if (data.length === 0) {
                         hideLoading();
-                        showImportResult('visitantes', 'error', '❌ Arquivo CSV vazio!');
+                        alert('❌ Arquivo CSV vazio!');
                         return;
                     }
 
                     showLoading(`Importando ${data.length} visitantes...`);
 
-                    const batch = db.batch();
                     let importados = 0;
                     let erros = 0;
-                    const errosMsgs = [];
 
                     for (let i = 0; i < data.length; i++) {
                         const row = data[i];
                         
                         const nome = row.nome || row.Nome || row.NOME || '';
-                        const cpf = row.cpf || row.CPF || row.documento || row.Documento || '';
+                        const cpf = row.cpf || row.CPF || row.documento || '';
 
                         if (!nome || !cpf) {
                             erros++;
-                            errosMsgs.push(`Linha ${i+2}: Nome ou CPF faltando`);
                             continue;
                         }
 
                         try {
-                            const docRef = db.collection('visitantes').doc();
-                            batch.set(docRef, {
+                            await db.collection('visitantes').add({
                                 nome: nome.trim(),
                                 cpf: cpf.trim(),
                                 tipo: row.tipo || row.Tipo || 'Visitante',
@@ -1360,9 +1686,10 @@
                                 placa: (row.placa || row.Placa || '').toUpperCase().trim(),
                                 cor: row.cor || row.Cor || '',
                                 modelo: row.modelo || row.Modelo || '',
-                                destino: row.destino || row.Destino || 'Não informado',
-                                observacao: row.observacao || row.Observacao || '',
-                                fotoUrl: row.fotoUrl || row.foto || '',
+                                destino: 'Não informado',
+                                observacao: '',
+                                fotoUrl: '',
+                                blacklist: false,
                                 status: 'INATIVO',
                                 entrada: firebase.firestore.FieldValue.serverTimestamp(),
                                 saida: firebase.firestore.FieldValue.serverTimestamp(),
@@ -1370,36 +1697,20 @@
                                 operadorSaida: currentOperator
                             });
                             importados++;
+                            updateLoadingProgress(`${importados}/${data.length}`);
                         } catch (error) {
                             erros++;
-                            errosMsgs.push(`Linha ${i+2}: ${error.message}`);
+                            console.error(`❌ Linha ${i+2}:`, error);
                         }
                     }
 
-                    try {
-                        await batch.commit();
-                        hideLoading();
-                        
-                        let msg = `✅ Importação concluída!\n\n`;
-                        msg += `📊 Importados: ${importados}\n`;
-                        if (erros > 0) {
-                            msg += `⚠️ Erros: ${erros}\n\n`;
-                            msg += errosMsgs.slice(0, 5).join('\n');
-                            if (errosMsgs.length > 5) {
-                                msg += `\n... e mais ${errosMsgs.length - 5} erros`;
-                            }
-                        }
-                        
-                        showImportResult('visitantes', 'success', msg);
-                        await loadVisitors();
-                    } catch (error) {
-                        hideLoading();
-                        showImportResult('visitantes', 'error', `❌ Erro ao salvar:\n${error.message}`);
-                    }
+                    hideLoading();
+                    alert(`✅ Importação concluída!\n\n📊 ${importados} visitantes importados${erros > 0 ? `\n⚠️ ${erros} erros` : ''}`);
+                    await loadVisitors();
                 },
                 error: function(error) {
                     hideLoading();
-                    showImportResult('visitantes', 'error', `❌ Erro ao ler CSV:\n${error.message}`);
+                    alert('❌ Erro ao ler CSV:\n' + error.message);
                 }
             });
         }
@@ -1407,134 +1718,75 @@
         async function importResidentesCSV(file) {
             if (!file) return;
 
+            console.log('📥 Iniciando importação de moradores...');
             showLoading('Lendo CSV...');
 
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
+                encoding: 'UTF-8',
                 complete: async function(results) {
                     const data = results.data;
                     
                     if (data.length === 0) {
                         hideLoading();
-                        showImportResult('residentes', 'error', '❌ Arquivo CSV vazio!');
+                        alert('❌ Arquivo CSV vazio!');
                         return;
                     }
 
-                    showLoading(`Importando ${data.length} residentes...`);
+                    showLoading(`Importando ${data.length} moradores...`);
 
-                    const batch = db.batch();
                     let importados = 0;
                     let erros = 0;
-                    const errosMsgs = [];
 
                     for (let i = 0; i < data.length; i++) {
                         const row = data[i];
                         
-                        // Busca flexível de colunas (aceita variações)
-                        const getNormalizedValue = (row, possibleKeys) => {
-                            for (let key of possibleKeys) {
-                                const exactMatch = row[key];
-                                if (exactMatch) return exactMatch;
-                                
-                                // Busca case-insensitive
-                                const lowerKey = key.toLowerCase();
-                                for (let rowKey in row) {
-                                    if (rowKey.toLowerCase() === lowerKey && row[rowKey]) {
-                                        return row[rowKey];
-                                    }
-                                }
-                            }
-                            return '';
-                        };
-
-                        const endereco = getNormalizedValue(row, ['endereco', 'endereço', 'Endereco', 'Endereço', 'ENDERECO', 'address', 'Address', 'ADDRESS']);
-                        const nome = getNormalizedValue(row, ['nome', 'Nome', 'NOME', 'name', 'Name', 'NAME']);
-                        const telefone = getNormalizedValue(row, ['telefone', 'Telefone', 'TELEFONE', 'phone', 'Phone', 'cel', 'celular']);
-                        const email = getNormalizedValue(row, ['email', 'Email', 'EMAIL', 'e-mail', 'E-mail']);
-                        const cpf = getNormalizedValue(row, ['cpf', 'CPF', 'documento', 'Documento', 'doc']);
-
-                        // Validação: precisa ter pelo menos endereço OU nome
-                        if (!endereco && !nome) {
+                        // Pega primeiro valor não vazio
+                        const valores = Object.values(row).filter(v => v && v.trim && v.trim() !== '');
+                        
+                        if (valores.length === 0) {
                             erros++;
-                            errosMsgs.push(`Linha ${i+2}: Sem endereço nem nome`);
                             continue;
                         }
-
-                        // Se não tem endereço mas tem nome, usa nome como endereço
-                        const enderecoFinal = endereco || nome;
                         
-                        // Se não tem nome, extrai do endereço (pega a parte da rua)
-                        let nomeFinal = nome;
-                        if (!nomeFinal && endereco) {
-                            // Tenta extrair nome da rua do endereço
-                            // Formato: "02 - RUA MARES DE MONTANHAS, 85"
-                            const match = endereco.match(/[-]\s*(.+?),/);
-                            if (match) {
-                                nomeFinal = match[1].trim();
-                            } else {
-                                nomeFinal = endereco.split(',')[0].trim();
-                            }
+                        const endereco = valores[0];
+                        
+                        // Tenta extrair nome
+                        let nome = 'Morador';
+                        const match = endereco.match(/[-]\s*(.+?),/);
+                        if (match) {
+                            nome = match[1].trim();
+                        } else if (endereco.includes(',')) {
+                            nome = endereco.split(',')[0].trim();
                         }
 
                         try {
-                            const docRef = db.collection('residentes').doc();
-                            batch.set(docRef, {
-                                nome: nomeFinal.trim() || 'Morador',
-                                endereco: enderecoFinal.trim(),
-                                telefone: telefone.trim(),
-                                email: email.trim(),
-                                cpf: cpf.trim(),
+                            await db.collection('residentes').add({
+                                nome: nome,
+                                endereco: endereco,
+                                telefone: valores[1] || '',
+                                email: valores[2] || '',
+                                cpf: valores[3] || '',
                                 criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                             });
                             importados++;
+                            updateLoadingProgress(`${importados}/${data.length}`);
                         } catch (error) {
                             erros++;
-                            errosMsgs.push(`Linha ${i+2}: ${error.message}`);
+                            console.error(`❌ Linha ${i+2}:`, error);
                         }
                     }
 
-                    try {
-                        await batch.commit();
-                        hideLoading();
-                        
-                        let msg = `✅ Importação concluída!\n\n`;
-                        msg += `📊 Importados: ${importados}\n`;
-                        if (erros > 0) {
-                            msg += `⚠️ Erros: ${erros}\n\n`;
-                            msg += errosMsgs.slice(0, 5).join('\n');
-                            if (errosMsgs.length > 5) {
-                                msg += `\n... e mais ${errosMsgs.length - 5} erros`;
-                            }
-                        }
-                        
-                        showImportResult('residentes', 'success', msg);
-                        await loadResidents();
-                        
-                        alert(`✅ Importação concluída!\n\n📊 ${importados} moradores importados${erros > 0 ? `\n⚠️ ${erros} erros` : ''}`);
-                    } catch (error) {
-                        hideLoading();
-                        showImportResult('residentes', 'error', `❌ Erro ao salvar:\n${error.message}`);
-                    }
+                    hideLoading();
+                    alert(`✅ Importação concluída!\n\n📊 ${importados} moradores importados${erros > 0 ? `\n⚠️ ${erros} erros` : ''}`);
+                    await loadResidents();
                 },
                 error: function(error) {
                     hideLoading();
-                    showImportResult('residentes', 'error', `❌ Erro ao ler CSV:\n${error.message}`);
+                    alert('❌ Erro ao ler CSV:\n' + error.message);
                 }
             });
-        }
-
-        function showImportResult(type, status, message) {
-            const elementId = type === 'visitantes' ? 'visitantesImportResult' : 'residentesImportResult';
-            const element = document.getElementById(elementId);
-            
-            element.textContent = message;
-            element.className = `import-result ${status}`;
-            element.style.display = 'block';
-
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 15000);
         }
 
         // ========== INICIALIZAÇÃO ==========
@@ -1597,13 +1849,15 @@
         async function loadResidents() {
             try {
                 const snapshot = await db.collection('residentes')
-                    .orderBy('nome')
+                    .limit(1000)
                     .get();
                 
                 residentsData = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
                 }));
+                
+                residentsData.sort((a, b) => a.nome.localeCompare(b.nome));
                 
                 console.log(`✅ ${residentsData.length} residentes carregados`);
             } catch (error) {
@@ -1727,7 +1981,7 @@
 
         function saveCustomization() {
             const systemName = document.getElementById('systemName').value.trim();
-            const logoUpload = document.getElementById('logoUpload');
+            const logoUpload = document.getElementById('logoUploadInput');
 
             if (systemName) {
                 customization.systemName = systemName;
@@ -1762,7 +2016,7 @@
             localStorage.setItem('zecure_customization', JSON.stringify(customization));
             
             document.getElementById('systemName').value = 'ZECURE';
-            document.getElementById('logoUpload').value = '';
+            document.getElementById('logoUploadInput').value = '';
             document.getElementById('logoPreviewImg').style.display = 'none';
 
             applyCustomization();
@@ -1803,6 +2057,8 @@
             
             if (screen !== 'cadastro') {
                 closeCamera();
+                // Limpar alertas quando sair da tela de cadastro
+                document.getElementById('dynamicAlerts').innerHTML = '';
             }
             
             if (screen === 'monitoramento') {
@@ -1887,14 +2143,12 @@
             const canvas = document.getElementById('canvas');
             const preview = document.getElementById('photoPreview');
             
-            // QUALIDADE AUMENTADA: 640x480 (antes: 240x180)
             canvas.width = 640;
             canvas.height = 480;
             
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, 640, 480);
             
-            // Qualidade JPEG: 0.8 (antes: 0.5)
             capturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
             
             preview.src = capturedPhoto;
@@ -1925,7 +2179,7 @@
             document.getElementById('openCameraBtn').style.display = 'block';
         }
 
-        // ========== LPR MELHORADO ==========
+        // ========== LPR MELHORADO (MAIS RÁPIDO) ==========
         async function openLPRScanner() {
             document.getElementById('lprModal').classList.add('active');
             detectedPlate = null;
@@ -1935,7 +2189,6 @@
             document.getElementById('lprConfirmBtn').style.display = 'none';
             document.getElementById('lprPreview').style.display = 'none';
             
-            // Abre câmera automaticamente
             try {
                 const video = document.getElementById('lprVideo');
                 if (lprVideoStream) {
@@ -1945,8 +2198,8 @@
                 lprVideoStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: 'environment',
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
                     }
                 });
                 
@@ -1966,18 +2219,14 @@
             document.getElementById('lprModal').classList.remove('active');
         }
 
-        // Pré-processamento de imagem para OCR
         function preprocessImageForOCR(canvas) {
             const ctx = canvas.getContext('2d');
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
             
-            // Aumentar contraste e converter para grayscale
             for (let i = 0; i < data.length; i += 4) {
                 const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-                
-                // Aumentar contraste (threshold adaptativo)
-                const enhanced = gray > 128 ? 255 : 0;
+                const enhanced = gray > 120 ? 255 : 0;
                 
                 data[i] = enhanced;
                 data[i + 1] = enhanced;
@@ -1985,7 +2234,7 @@
             }
             
             ctx.putImageData(imageData, 0, 0);
-            return canvas.toDataURL('image/jpeg', 0.9);
+            return canvas.toDataURL('image/jpeg', 0.95);
         }
 
         async function capturePlatePhoto() {
@@ -1994,13 +2243,12 @@
             try {
                 const video = document.getElementById('lprVideo');
                 const canvas = document.createElement('canvas');
-                canvas.width = 1280;
-                canvas.height = 720;
+                canvas.width = 1920;
+                canvas.height = 1080;
                 
                 const ctx = canvas.getContext('2d');
-                ctx.drawImage(video, 0, 0, 1280, 720);
+                ctx.drawImage(video, 0, 0, 1920, 1080);
                 
-                // Pré-processar imagem
                 const processedImage = preprocessImageForOCR(canvas);
                 
                 document.getElementById('lprPreview').src = processedImage;
@@ -2022,17 +2270,16 @@
                             }
                         },
                         tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-                        tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK
+                        tessedit_pageseg_mode: Tesseract.PSM.SINGLE_LINE
                     }
                 );
                 
                 const text = result.data.text.replace(/\s+/g, '').toUpperCase();
                 console.log('OCR detectado:', text);
                 
-                // Regex aprimorado para placas BR (Mercosul e antiga)
                 const platePatterns = [
-                    /([A-Z]{3}[0-9][A-Z][0-9]{2})/,  // Mercosul: ABC1D23
-                    /([A-Z]{3}[0-9]{4})/              // Antiga: ABC1234
+                    /([A-Z]{3}[0-9][A-Z][0-9]{2})/,
+                    /([A-Z]{3}[0-9]{4})/
                 ];
                 
                 let plateMatch = null;
@@ -2044,11 +2291,8 @@
                 if (plateMatch) {
                     let plate = plateMatch[1];
                     
-                    // Formatar placa
                     if (plate.length === 7 && /^[A-Z]{3}[0-9]{4}$/.test(plate)) {
                         plate = plate.substring(0, 3) + '-' + plate.substring(3);
-                    } else if (plate.length === 7 && /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/.test(plate)) {
-                        // Placa Mercosul não precisa de hífen
                     }
                     
                     detectedPlate = plate;
@@ -2062,7 +2306,7 @@
                     document.getElementById('lprResult').textContent = '❌ Placa não detectada';
                     document.getElementById('lprResult').style.color = 'var(--danger)';
                     document.getElementById('lprRetryBtn').style.display = 'block';
-                    alert('❌ Não consegui ler a placa.\n\nDicas:\n• Aproxime mais a câmera\n• Melhore a iluminação\n• Evite reflexos');
+                    alert('❌ Não consegui ler a placa.\n\nDicas:\n• Aproxime mais a câmera\n• Melhore a iluminação\n• Evite reflexos\n• Use câmera traseira');
                 }
                 
             } catch (error) {
@@ -2133,52 +2377,319 @@
             }
         }
 
-        // ========== BUSCA E AUTO-PREENCHIMENTO POR CPF ==========
-        async function searchVisitorByCPF(cpf) {
-            const cpfLimpo = cpf.replace(/[^\d]/g, '');
+        // ========== BUSCA E AUTO-PREENCHIMENTO POR CPF (COM VERIFICAÇÕES) ==========
+        // ========== BUSCA POR CPF (CASE-INSENSITIVE) ==========
+async function searchVisitorByCPF(cpf) {
+    const cpfLimpo = cpf.replace(/[^\d]/g, '');
+    
+    if (cpfLimpo.length !== 11) {
+        return;
+    }
+    
+    // Verificar entrada duplicada
+    await checkDuplicateEntry(cpf);
+    
+    // Normalizar CPF para comparação (sem pontos e hífens)
+    const localVisitor = visitorsData
+        .filter(v => {
+            const vCpf = (v.cpf || '').replace(/[^\d]/g, '');
+            return vCpf === cpfLimpo;
+        })
+        .sort((a, b) => {
+            const dateA = new Date(a.entrada);
+            const dateB = new Date(b.entrada);
+            return dateB - dateA;
+        })[0];
+
+    if (localVisitor) {
+        autoFillVisitorData(localVisitor);
+        return;
+    }
+
+    showLoading('Buscando histórico...');
+    
+    try {
+        // BUSCA SEM orderBy (evita erro de índice)
+        const snapshot = await db.collection('visitantes')
+            .where('cpf', '==', cpf)
+            .limit(10)
+            .get();
+        
+        hideLoading();
+        
+        if (!snapshot.empty) {
+            // ORDENAR LOCALMENTE
+            const allVisitors = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                entrada: doc.data().entrada?.toDate() || new Date(0)
+            }));
             
-            if (cpfLimpo.length !== 11) {
-                return;
-            }
+            allVisitors.sort((a, b) => b.entrada - a.entrada);
             
-            const localVisitor = visitorsData
-                .filter(v => v.cpf.replace(/[^\d]/g, '') === cpfLimpo)
+            const visitor = {
+                ...allVisitors[0],
+                entrada: allVisitors[0].entrada.toLocaleString('pt-BR')
+            };
+            
+            autoFillVisitorData(visitor);
+        }
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Erro ao buscar visitante:', error);
+    }
+}
+
+// ========== BUSCA POR NOME (CASE-INSENSITIVE) ==========
+async function searchVisitorByName(name) {
+    const list = document.getElementById('nameAutocompleteList');
+    
+    if (!name || name.length < 2) {
+        list.classList.remove('show');
+        document.getElementById('dynamicAlerts').innerHTML = '';
+        return;
+    }
+
+    clearTimeout(searchNameAutocompleteTimer);
+    
+    searchNameAutocompleteTimer = setTimeout(async () => {
+        console.log(`🔍 Buscando visitante por nome: "${name}"`);
+        
+        // NORMALIZAR PARA CASE-INSENSITIVE + SEM ACENTOS
+        const normalizeString = (str) => {
+            if (!str) return '';
+            return str
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        };
+        
+        const nameNormalized = normalizeString(name);
+        
+        const localResults = visitorsData
+            .filter(v => {
+                const nomeNorm = normalizeString(v.nome || '');
+                return nomeNorm.includes(nameNormalized);
+            })
+            .sort((a, b) => {
+                const dateA = new Date(a.entrada);
+                const dateB = new Date(b.entrada);
+                return dateB - dateA;
+            })
+            .slice(0, 10);
+
+        if (localResults.length > 0) {
+            displayNameAutocomplete(localResults, list);
+            return;
+        }
+
+        try {
+            const snapshot = await db.collection('visitantes')
+                .limit(100)
+                .get();
+            
+            const allVisitors = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
+            }));
+            
+            const filtered = allVisitors
+                .filter(v => {
+                    const nomeNorm = normalizeString(v.nome || '');
+                    return nomeNorm.includes(nameNormalized);
+                })
                 .sort((a, b) => {
                     const dateA = new Date(a.entrada);
                     const dateB = new Date(b.entrada);
                     return dateB - dateA;
-                })[0];
+                })
+                .slice(0, 10);
+            
+            if (filtered.length > 0) {
+                displayNameAutocomplete(filtered, list);
+            } else {
+                list.classList.remove('show');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar por nome:', error);
+        }
+    }, 300);
+}
 
-            if (localVisitor) {
-                autoFillVisitorData(localVisitor);
+// ========== BUSCA DE MORADORES (CASE-INSENSITIVE) ==========
+async function searchResidents(query) {
+    const list = document.getElementById('autocompleteList');
+    
+    if (!query || query.length < 2) {
+        list.classList.remove('show');
+        return;
+    }
+
+    clearTimeout(searchResidentsTimer);
+    
+    searchResidentsTimer = setTimeout(async () => {
+        console.log(`🔍 Buscando morador: "${query}"`);
+        
+        // NORMALIZAR (case-insensitive + sem acentos)
+        const normalizeString = (str) => {
+            if (!str) return '';
+            return str
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        };
+        
+        const queryNormalized = normalizeString(query);
+        
+        if (residentsData && residentsData.length > 0) {
+            const filtered = residentsData.filter(r => {
+                const nomeNorm = normalizeString(r.nome || '');
+                const enderecoNorm = normalizeString(r.endereco || '');
+                
+                return nomeNorm.includes(queryNormalized) || 
+                       enderecoNorm.includes(queryNormalized);
+            });
+
+            if (filtered.length > 0) {
+                displayResidentsList(filtered, list);
                 return;
             }
-
-            showLoading('Buscando histórico...');
-            
-            try {
-                const snapshot = await db.collection('visitantes')
-                    .where('cpf', '==', cpf)
-                    .orderBy('entrada', 'desc')
-                    .limit(1)
-                    .get();
-                
-                hideLoading();
-                
-                if (!snapshot.empty) {
-                    const visitor = {
-                        id: snapshot.docs[0].id,
-                        ...snapshot.docs[0].data(),
-                        entrada: snapshot.docs[0].data().entrada?.toDate().toLocaleString('pt-BR') || ''
-                    };
-                    autoFillVisitorData(visitor);
-                }
-                
-            } catch (error) {
-                hideLoading();
-                console.error('Erro ao buscar visitante:', error);
-            }
         }
+
+        try {
+            const snapshot = await db.collection('residentes')
+                .limit(100)
+                .get();
+            
+            const allResidents = snapshot.docs.map(doc => doc.data());
+            
+            const filtered = allResidents.filter(r => {
+                const nomeNorm = normalizeString(r.nome || '');
+                const enderecoNorm = normalizeString(r.endereco || '');
+                
+                return nomeNorm.includes(queryNormalized) || 
+                       enderecoNorm.includes(queryNormalized);
+            });
+            
+            if (filtered.length > 0) {
+                displayResidentsList(filtered, list);
+            } else {
+                list.innerHTML = `<div class="autocomplete-item" style="color: var(--danger); text-align: center; padding: 16px;">
+                    ❌ Nenhum morador encontrado
+                </div>`;
+                list.classList.add('show');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar residente:', error);
+        }
+    }, 300);
+}
+
+// ========== BUSCA PARA SAÍDA (CASE-INSENSITIVE) ==========
+async function searchByName(nome) {
+    if (!nome || nome.length < 2) {
+        document.getElementById('exitResultsList').innerHTML = '';
+        return;
+    }
+    
+    clearTimeout(searchNameTimer);
+    
+    searchNameTimer = setTimeout(async () => {
+        const normalizeString = (str) => {
+            if (!str) return '';
+            return str
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        };
+        
+        const nomeNormalized = normalizeString(nome);
+        
+        const localResults = visitorsData.filter(v => 
+            v.status === 'ATIVO' && 
+            normalizeString(v.nome || '').includes(nomeNormalized)
+        );
+
+        if (localResults.length > 0) {
+            displayExitResults(localResults);
+            return;
+        }
+
+        try {
+            showLoading('Buscando...');
+            
+            const snapshot = await db.collection('visitantes')
+                .where('status', '==', 'ATIVO')
+                .limit(100)
+                .get();
+            
+            const allVisitors = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
+            }));
+            
+            const results = allVisitors.filter(v => 
+                normalizeString(v.nome || '').includes(nomeNormalized)
+            );
+            
+            hideLoading();
+            displayExitResults(results);
+        } catch (error) {
+            hideLoading();
+            console.error('Erro:', error);
+        }
+    }, 400);
+}
+
+async function searchByCPF(cpf) {
+    if (!cpf || cpf.replace(/[^\d]/g, '').length < 3) {
+        document.getElementById('exitResultsList').innerHTML = '';
+        return;
+    }
+    
+    clearTimeout(searchCPFTimer);
+    
+    searchCPFTimer = setTimeout(async () => {
+        const cpfLimpo = cpf.replace(/[^\d]/g, '');
+        
+        const localResults = visitorsData.filter(v => {
+            const vCpf = (v.cpf || '').replace(/[^\d]/g, '');
+            return v.status === 'ATIVO' && vCpf.includes(cpfLimpo);
+        });
+
+        if (localResults.length > 0) {
+            displayExitResults(localResults);
+            return;
+        }
+
+        try {
+            showLoading('Buscando...');
+            
+            const snapshot = await db.collection('visitantes')
+                .where('status', '==', 'ATIVO')
+                .where('cpf', '==', cpf)
+                .get();
+            
+            const results = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
+            }));
+            
+            hideLoading();
+            displayExitResults(results);
+        } catch (error) {
+            hideLoading();
+            console.error('Erro:', error);
+        }
+    }, 400);
+}
 
         function autoFillVisitorData(visitor) {
             if (visitor.nome) document.getElementById('fullName').value = visitor.nome;
@@ -2187,6 +2698,14 @@
             if (visitor.placa) document.getElementById('vehiclePlate').value = visitor.placa;
             if (visitor.cor) document.getElementById('vehicleColor').value = visitor.cor;
             if (visitor.modelo) document.getElementById('vehicleModel').value = visitor.modelo;
+            
+            // LISTA NEGRA
+            if (visitor.blacklist) {
+                document.getElementById('blacklist').checked = true;
+                showBlacklistWarning(visitor.nome);
+            } else {
+                document.getElementById('blacklist').checked = false;
+            }
             
             if (visitor.fotoUrl) {
                 capturedPhoto = visitor.fotoUrl;
@@ -2217,6 +2736,7 @@
                             <div style="font-size: 0.75em; opacity: 0.95;">
                                 Nome: <strong>${visitor.nome}</strong><br>
                                 ${visitor.placa ? `Placa: <strong>${visitor.placa}</strong>` : 'Sem veículo'}
+                                ${visitor.blacklist ? '<br><strong style="color: #FFD700;">⚠️ LISTA NEGRA</strong>' : ''}
                             </div>
                         </div>
                         <button onclick="this.parentElement.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 1.2em;">×</button>
@@ -2226,24 +2746,6 @@
                     </div>
                 </div>
             `;
-            
-            if (!document.querySelector('#autofillAnimation')) {
-                const style = document.createElement('style');
-                style.id = 'autofillAnimation';
-                style.textContent = `
-                    @keyframes slideDown {
-                        from {
-                            opacity: 0;
-                            transform: translateY(-20px);
-                        }
-                        to {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
             
             const form = document.getElementById('accessForm');
             form.insertBefore(notification, form.firstChild);
@@ -2269,12 +2771,29 @@
             clearTimeout(searchResidentsTimer);
             
             searchResidentsTimer = setTimeout(async () => {
+                console.log(`🔍 Buscando morador: "${query}"`);
+                console.log(`📊 Total de residentes: ${residentsData.length}`);
+                
                 if (residentsData && residentsData.length > 0) {
-                    const queryLower = query.toLowerCase();
-                    const filtered = residentsData.filter(r => 
-                        r.nome.toLowerCase().includes(queryLower) ||
-                        r.endereco.toLowerCase().includes(queryLower)
-                    );
+                    const normalizeString = (str) => {
+                        if (!str) return '';
+                        return str.toLowerCase()
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .trim();
+                    };
+                    
+                    const queryNormalized = normalizeString(query);
+                    
+                    const filtered = residentsData.filter(r => {
+                        const nomeNorm = normalizeString(r.nome || '');
+                        const enderecoNorm = normalizeString(r.endereco || '');
+                        
+                        return nomeNorm.includes(queryNormalized) || 
+                               enderecoNorm.includes(queryNormalized);
+                    });
+
+                    console.log(`📋 Resultados encontrados: ${filtered.length}`);
 
                     if (filtered.length > 0) {
                         displayResidentsList(filtered, list);
@@ -2284,17 +2803,24 @@
 
                 try {
                     const snapshot = await db.collection('residentes')
-                        .where('nome', '>=', query)
-                        .where('nome', '<=', query + '\uf8ff')
-                        .limit(5)
+                        .limit(100)
                         .get();
                     
-                    const filtered = snapshot.docs.map(doc => doc.data());
+                    const allResidents = snapshot.docs.map(doc => doc.data());
+                    
+                    const queryLower = query.toLowerCase();
+                    const filtered = allResidents.filter(r => 
+                        (r.nome && r.nome.toLowerCase().includes(queryLower)) ||
+                        (r.endereco && r.endereco.toLowerCase().includes(queryLower))
+                    );
                     
                     if (filtered.length > 0) {
                         displayResidentsList(filtered, list);
                     } else {
-                        list.classList.remove('show');
+                        list.innerHTML = `<div class="autocomplete-item" style="color: var(--danger); text-align: center; padding: 16px;">
+                            ❌ Nenhum morador encontrado
+                        </div>`;
+                        list.classList.add('show');
                     }
                 } catch (error) {
                     console.error('Erro ao buscar residente:', error);
@@ -2321,7 +2847,7 @@
             document.getElementById('autocompleteList').classList.remove('show');
         }
 
-        // ========== REGISTRAR ENTRADA ==========
+        // ========== REGISTRAR ENTRADA (COM VERIFICAÇÕES) ==========
         document.getElementById('accessForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -2365,6 +2891,22 @@
                 return;
             }
 
+            // VERIFICAR ENTRADA DUPLICADA ANTES DE SALVAR
+            const isDuplicate = await checkDuplicateEntry(cpf);
+            if (isDuplicate) {
+                if (!confirm('⚠️ Pessoa JÁ está ATIVA no sistema.\n\nDeseja registrar entrada mesmo assim?\n\n(RECOMENDADO: Registrar saída primeiro)')) {
+                    return;
+                }
+            }
+
+            const isBlacklist = document.getElementById('blacklist').checked;
+
+            if (isBlacklist) {
+                if (!confirm(`⚠️ ATENÇÃO: ${nome} será marcado na LISTA NEGRA.\n\nDeseja continuar?`)) {
+                    return;
+                }
+            }
+
             try {
                 showLoading('Enviando foto...');
                 
@@ -2387,6 +2929,7 @@
                     destino: destino,
                     observacao: document.getElementById('observation').value.trim(),
                     fotoUrl: fotoUrl,
+                    blacklist: isBlacklist,
                     status: 'ATIVO',
                     entrada: firebase.firestore.FieldValue.serverTimestamp(),
                     saida: null,
@@ -2396,7 +2939,7 @@
                 
                 hideLoading();
                 
-                alert(`✅ Entrada registrada!\n\nVisitante: ${nome}\nOperador: ${currentOperator}`);
+                alert(`✅ Entrada registrada!\n\nVisitante: ${nome}\nOperador: ${currentOperator}${isBlacklist ? '\n⚠️ LISTA NEGRA' : ''}`);
                 
                 this.reset();
                 capturedPhoto = null;
@@ -2406,6 +2949,10 @@
                 document.getElementById('changePhotoBtn').style.display = 'none';
                 document.getElementById('openCameraBtn').style.display = 'block';
                 document.getElementById('cameraContainer').style.display = 'none';
+                document.getElementById('blacklist').checked = false;
+                
+                // Limpar alertas
+                document.getElementById('dynamicAlerts').innerHTML = '';
                 
                 const notification = document.querySelector('.autofill-notification');
                 if (notification) {
@@ -2472,8 +3019,11 @@
                 return;
             }
 
-            list.innerHTML = ativos.map(v => `
-                <div class="visitor-card">
+            list.innerHTML = ativos.map(v => {
+                const blacklistClass = v.blacklist ? 'blacklist' : '';
+                const blacklistBadge = v.blacklist ? '<span class="blacklist-badge">⚠️ LISTA NEGRA</span>' : '';
+                
+                return `<div class="visitor-card ${blacklistClass}">
                     <img src="${v.fotoUrl || ''}" class="visitor-photo" onerror="this.style.display='none'">
                     <div class="visitor-info">
                         <div class="visitor-name">${v.nome}</div>
@@ -2481,9 +3031,12 @@
                         <div class="visitor-detail">🕐 ${v.entrada}</div>
                         <div class="visitor-detail">👤 ${v.operadorEntrada || 'N/A'}</div>
                     </div>
-                    <span class="status-badge status-ativo">ATIVO</span>
-                </div>
-            `).join('');
+                    <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                        ${blacklistBadge}
+                        <span class="status-badge status-ativo">ATIVO</span>
+                    </div>
+                </div>`;
+            }).join('');
         }
 
         function refreshMonitoring() {
@@ -2682,8 +3235,11 @@
                     <h4 style="font-size: 0.9em; margin-bottom: 10px; color: var(--dark); padding: 10px; background: var(--gray-light); border-radius: 8px;">
                         👤 ${results.length} ativo(s):
                     </h4>
-                    ${results.map(v => `
-                        <div class="visitor-card">
+                    ${results.map(v => {
+                        const blacklistClass = v.blacklist ? 'blacklist' : '';
+                        const blacklistBadge = v.blacklist ? '<span class="blacklist-badge" style="font-size: 0.65em;">⚠️ LISTA NEGRA</span>' : '';
+                        
+                        return `<div class="visitor-card ${blacklistClass}">
                             <img src="${v.fotoUrl || ''}" class="visitor-photo" onerror="this.style.display='none'">
                             <div class="visitor-info">
                                 <div class="visitor-name">${v.nome}</div>
@@ -2692,10 +3248,11 @@
                                 <div class="visitor-detail">🚗 ${v.placa || 'Sem placa'}</div>
                                 <div class="visitor-detail">📍 ${v.destino}</div>
                                 <div class="visitor-detail">🕐 ${v.entrada}</div>
+                                ${blacklistBadge}
                             </div>
                             <button class="btn btn-danger btn-sm" onclick="confirmExitFromFacial('${v.id}')">🚪 Saída</button>
-                        </div>
-                    `).join('')}
+                        </div>`;
+                    }).join('')}
                 </div>`;
                 
             } catch (error) {
@@ -2722,8 +3279,11 @@
                 return;
             }
 
-            list.innerHTML = results.map(v => `
-                <div class="visitor-card">
+            list.innerHTML = results.map(v => {
+                const blacklistClass = v.blacklist ? 'blacklist' : '';
+                const blacklistBadge = v.blacklist ? '<span class="blacklist-badge" style="font-size: 0.65em;">⚠️ LISTA NEGRA</span>' : '';
+                
+                return `<div class="visitor-card ${blacklistClass}">
                     <img src="${v.fotoUrl || ''}" class="visitor-photo" onerror="this.style.display='none'">
                     <div class="visitor-info">
                         <div class="visitor-name">${v.nome}</div>
@@ -2732,10 +3292,11 @@
                         <div class="visitor-detail">🚗 ${v.placa || 'Sem placa'}</div>
                         <div class="visitor-detail">📍 ${v.destino}</div>
                         <div class="visitor-detail">🕐 ${v.entrada}</div>
+                        ${blacklistBadge}
                     </div>
                     <button class="btn btn-danger btn-sm" onclick="confirmExit('${v.id}')">🚪 Saída</button>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         async function confirmExit(visitanteId) {
@@ -2820,8 +3381,11 @@
                 return;
             }
 
-            list.innerHTML = filteredVisitorsData.slice().reverse().map(v => `
-                <div class="visitor-card">
+            list.innerHTML = filteredVisitorsData.slice().reverse().map(v => {
+                const blacklistClass = v.blacklist ? 'blacklist' : '';
+                const blacklistBadge = v.blacklist ? '<span class="blacklist-badge" style="font-size: 0.65em;">⚠️ LISTA NEGRA</span>' : '';
+                
+                return `<div class="visitor-card ${blacklistClass}">
                     <img src="${v.fotoUrl || ''}" class="visitor-photo" onerror="this.style.display='none'">
                     <div class="visitor-info">
                         <div class="visitor-name">${v.nome}</div>
@@ -2831,10 +3395,11 @@
                         <div class="visitor-detail">📍 ${v.destino}</div>
                         <div class="visitor-detail">🕐 ${v.entrada}</div>
                         ${v.saida ? `<div class="visitor-detail">🚪 ${v.saida}</div>` : ''}
+                        ${blacklistBadge}
                     </div>
                     <span class="status-badge ${v.status === 'ATIVO' ? 'status-ativo' : 'status-inativo'}">${v.status}</span>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         // ========== RELATÓRIO ==========
@@ -2857,8 +3422,11 @@
                     return;
                 }
 
-                list.innerHTML = visitorsData.slice().reverse().map(v => `
-                    <div class="visitor-card">
+                list.innerHTML = visitorsData.slice().reverse().map(v => {
+                    const blacklistClass = v.blacklist ? 'blacklist' : '';
+                    const blacklistBadge = v.blacklist ? '<span class="blacklist-badge" style="font-size: 0.65em;">⚠️ LISTA NEGRA</span>' : '';
+                    
+                    return `<div class="visitor-card ${blacklistClass}">
                         <img src="${v.fotoUrl || ''}" class="visitor-photo" onerror="this.style.display='none'">
                         <div class="visitor-info">
                             <div class="visitor-name">${v.nome}</div>
@@ -2868,10 +3436,11 @@
                             <div class="visitor-detail">📍 ${v.destino}</div>
                             <div class="visitor-detail">🕐 ${v.entrada}</div>
                             ${v.saida ? `<div class="visitor-detail">🚪 ${v.saida}</div>` : ''}
+                            ${blacklistBadge}
                         </div>
                         <span class="status-badge ${v.status === 'ATIVO' ? 'status-ativo' : 'status-inativo'}">${v.status}</span>
-                    </div>
-                `).join('');
+                    </div>`;
+                }).join('');
                 
             } catch (error) {
                 hideLoading();
@@ -2937,11 +3506,12 @@
                     v.destino,
                     v.entrada,
                     v.saida || '-',
-                    v.status
+                    v.status,
+                    v.blacklist ? 'SIM' : 'NÃO'
                 ]);
 
                 doc.autoTable({
-                    head: [['Nome', 'CPF', 'Tipo', 'Placa', 'Destino', 'Entrada', 'Saída', 'Status']],
+                    head: [['Nome', 'CPF', 'Tipo', 'Placa', 'Destino', 'Entrada', 'Saída', 'Status', 'Lista Negra']],
                     body: tableData,
                     startY: 38,
                     styles: { fontSize: 7, cellPadding: 1.5 },
@@ -2990,6 +3560,7 @@
         document.addEventListener('click', function(e) {
             if (!e.target.closest('.autocomplete-wrapper')) {
                 document.getElementById('autocompleteList').classList.remove('show');
+                document.getElementById('nameAutocompleteList').classList.remove('show');
             }
         });
     </script>
