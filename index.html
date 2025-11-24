@@ -60,7 +60,7 @@
             color: var(--dark);
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-            padding-bottom: 80px;
+            padding-bottom: 20px;
         }
 
         .header {
@@ -146,49 +146,141 @@
             gap: 6px;
         }
 
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
-            padding: 8px 0 16px;
-            box-shadow: 0 -4px 20px rgba(76, 119, 153, 0.15);
-            z-index: 1000;
+        /* ========== DASHBOARD HOME GRID ========== */
+        .dashboard-container {
+            padding: 14px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        .nav-item {
-            flex: 1;
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 24px 18px;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.3s;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8px;
-            color: var(--gray);
-            font-size: 0.65em;
-            font-weight: 600;
-            border: none;
-            background: none;
-            cursor: pointer;
-            transition: all 0.3s;
+            gap: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
 
-        .nav-item .icon {
-            font-size: 1.8em;
-            margin-bottom: 4px;
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            transform: scaleX(0);
             transition: transform 0.3s;
         }
 
-        .nav-item.active {
+        .dashboard-card:active {
+            transform: scale(0.97);
+        }
+
+        .dashboard-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .dashboard-card-icon {
+            font-size: 2.5em;
+            margin-bottom: 6px;
+        }
+
+        .dashboard-card-title {
+            font-size: 0.9em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .dashboard-card-desc {
+            font-size: 0.7em;
+            color: var(--gray);
+            line-height: 1.4;
+        }
+
+        .dashboard-card.danger .dashboard-card-icon {
+            color: var(--danger);
+        }
+
+        .dashboard-card.success .dashboard-card-icon {
+            color: var(--success);
+        }
+
+        .dashboard-card.info .dashboard-card-icon {
+            color: var(--info);
+        }
+
+        .dashboard-card.warning .dashboard-card-icon {
+            color: var(--warning);
+        }
+
+        .dashboard-card.primary .dashboard-card-icon {
             color: var(--primary);
         }
 
-        .nav-item.active .icon {
-            transform: scale(1.1);
+        .dashboard-card-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--danger);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: 700;
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* ========== BACK BUTTON ========== */
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s;
+        }
+
+        .back-button:active {
+            transform: scale(0.95);
         }
 
         .content {
             padding: 14px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .screen {
@@ -853,9 +945,12 @@
         }
 
         @media (min-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
             .content {
-                max-width: 600px;
-                margin: 0 auto;
+                max-width: 900px;
             }
         }
     </style>
@@ -880,6 +975,9 @@
         <div class="header">
             <div class="header-content">
                 <div class="header-left">
+                    <button class="back-button" id="backButton" onclick="goToHome()" style="display: none;">
+                        ← Voltar
+                    </button>
                     <div class="logo" id="headerLogo">🔐</div>
                     <div class="header-text">
                         <h1 id="headerTitle">ZECURE</h1>
@@ -899,12 +997,68 @@
             </div>
         </div>
 
+        <!-- TELA HOME - DASHBOARD -->
+        <div id="homeScreen" class="screen active">
+            <div class="dashboard-container">
+                <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; text-align: center;">
+                    <h2 style="font-size: 1.2em; margin-bottom: 8px;">Bem-vindo ao Dashboard</h2>
+                    <p style="font-size: 0.85em; opacity: 0.9;">Selecione um módulo para começar</p>
+                </div>
+
+                <div class="dashboard-grid">
+                    <!-- Card 1: Entrada -->
+                    <div class="dashboard-card success" onclick="showScreen('cadastro')">
+                        <div class="dashboard-card-icon">📝</div>
+                        <div class="dashboard-card-title">ENTRADA</div>
+                        <div class="dashboard-card-desc">Registrar nova entrada de visitante</div>
+                    </div>
+
+                    <!-- Card 2: Monitoramento -->
+                    <div class="dashboard-card info" onclick="showScreen('monitoramento')">
+                        <div class="dashboard-card-icon">👥</div>
+                        <div class="dashboard-card-title">ATIVOS</div>
+                        <div class="dashboard-card-desc">Visitantes no local agora</div>
+                        <div class="dashboard-card-badge" id="activeBadge">0</div>
+                    </div>
+
+                    <!-- Card 3: Saída -->
+                    <div class="dashboard-card danger" onclick="showScreen('saida')">
+                        <div class="dashboard-card-icon">🚪</div>
+                        <div class="dashboard-card-title">SAÍDA</div>
+                        <div class="dashboard-card-desc">Registrar saída de visitante</div>
+                    </div>
+
+                    <!-- Card 4: Relatório -->
+                    <div class="dashboard-card primary" onclick="showScreen('relatorio')">
+                        <div class="dashboard-card-icon">📊</div>
+                        <div class="dashboard-card-title">RELATÓRIOS</div>
+                        <div class="dashboard-card-desc">Histórico e exportação</div>
+                    </div>
+
+                    <!-- Card 5: Lista Negra -->
+                    <div class="dashboard-card warning" onclick="showScreen('listanegra')">
+                        <div class="dashboard-card-icon">⚠️</div>
+                        <div class="dashboard-card-title">LISTA NEGRA</div>
+                        <div class="dashboard-card-desc">Gerenciar alertas</div>
+                        <div class="dashboard-card-badge" id="blacklistBadge">0</div>
+                    </div>
+
+                    <!-- Card 6: Configurações -->
+                    <div class="dashboard-card primary" onclick="showScreenWithAuth('config')">
+                        <div class="dashboard-card-icon">⚙️</div>
+                        <div class="dashboard-card-title">CONFIGURAÇÕES</div>
+                        <div class="dashboard-card-desc">Sistema e operador</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="content">
             <!-- ALERTAS DINÂMICOS -->
             <div id="dynamicAlerts" style="margin-bottom: 14px;"></div>
 
             <!-- TELA DE CADASTRO/ENTRADA -->
-            <div id="cadastroScreen" class="screen active">
+            <div id="cadastroScreen" class="screen">
                 <form id="accessForm">
                     <div class="card">
                         <div class="card-title">📸 Reconhecimento Facial</div>
@@ -1137,6 +1291,21 @@
                 <div id="reportList"></div>
             </div>
 
+            <!-- TELA LISTA NEGRA -->
+            <div id="listanegraScreen" class="screen">
+                <div class="card" style="background: linear-gradient(135deg, #E74C3C, #C0392B); color: white;">
+                    <h2 style="font-size: 1.1em; margin-bottom: 8px;">⚠️ LISTA NEGRA</h2>
+                    <p style="font-size: 0.8em; opacity: 0.95;">Pessoas marcadas para alertas de segurança</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔍 Filtros</div>
+                    <button class="btn btn-info" onclick="loadBlacklistVisitors()">🔄 Atualizar Lista</button>
+                </div>
+
+                <div id="blacklistList"></div>
+            </div>
+
             <!-- TELA DE CONFIG -->
             <div id="configScreen" class="screen">
                 <div class="card">
@@ -1218,30 +1387,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- NAV -->
-        <div class="bottom-nav">
-            <button class="nav-item active" onclick="showScreen('cadastro')">
-                <div class="icon">📝</div>
-                <div>Entrada</div>
-            </button>
-            <button class="nav-item" onclick="showScreen('monitoramento')">
-                <div class="icon">📺</div>
-                <div>Monitor</div>
-            </button>
-            <button class="nav-item" onclick="showScreen('saida')">
-                <div class="icon">🚪</div>
-                <div>Saída</div>
-            </button>
-            <button class="nav-item" onclick="showScreen('relatorio')">
-                <div class="icon">📊</div>
-                <div>Relatório</div>
-            </button>
-            <button class="nav-item" onclick="showScreenWithAuth('config')">
-                <div class="icon">⚙️</div>
-                <div>Config</div>
-            </button>
-        </div>
     </div>
 
     <!-- MODAL DE SENHA CONFIG -->
@@ -1261,7 +1406,7 @@
                 </div>
                 <button class="btn btn-primary" onclick="verifyConfigPassword()">🔓 Acessar</button>
                 <p style="font-size: 0.7em; color: var(--gray); margin-top: 14px; text-align: center;">
-                    💡 Senha padrão: <strong>Busque no seu HD interno</strong>
+                    💡 Senha padrão: <strong> Procure na sua mente!</strong>
                 </p>
             </div>
         </div>
@@ -1368,6 +1513,89 @@
         let monitoringInterval = null;
         let monitoringUnsubscribe = null;
 
+        // ========== NAVEGAÇÃO DASHBOARD ==========
+        function goToHome() {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('homeScreen').classList.add('active');
+            document.getElementById('backButton').style.display = 'none';
+            
+            closeCamera();
+            stopMonitoringAutoRefresh();
+            document.getElementById('dynamicAlerts').innerHTML = '';
+            
+            updateDashboardBadges();
+        }
+
+        function showScreen(screen) {
+            if (screen === 'home') {
+                goToHome();
+                return;
+            }
+            
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('homeScreen').classList.remove('active');
+            
+            const screens = {
+                'cadastro': 'cadastroScreen',
+                'monitoramento': 'monitoramentoScreen',
+                'saida': 'saidaScreen',
+                'relatorio': 'relatorioScreen',
+                'listanegra': 'listanegraScreen',
+                'config': 'configScreen'
+            };
+            
+            document.getElementById(screens[screen]).classList.add('active');
+            document.getElementById('backButton').style.display = 'flex';
+            
+            if (screen !== 'cadastro') {
+                closeCamera();
+                document.getElementById('dynamicAlerts').innerHTML = '';
+            }
+            
+            if (screen === 'monitoramento') {
+                loadMonitoring();
+            } else {
+                stopMonitoringAutoRefresh();
+            }
+            
+            if (screen === 'relatorio') {
+                loadReport();
+            } else if (screen === 'saida') {
+                loadVisitors();
+            } else if (screen === 'config') {
+                loadCustomizationForm();
+            } else if (screen === 'listanegra') {
+                loadBlacklistVisitors();
+            }
+        }
+
+        function showScreenWithAuth(screen) {
+            if (screen === 'config') {
+                document.getElementById('configPasswordModal').classList.add('active');
+                document.getElementById('configPasswordInput').value = '';
+                document.getElementById('configPasswordInput').focus();
+            } else {
+                showScreen(screen);
+            }
+        }
+
+        async function updateDashboardBadges() {
+            try {
+                const snapshot = await db.collection('visitantes')
+                    .where('status', '==', 'ATIVO')
+                    .get();
+                
+                const activeCount = snapshot.size;
+                document.getElementById('activeBadge').textContent = activeCount;
+                
+                const blacklistCount = visitorsData.filter(v => v.blacklist === true).length;
+                document.getElementById('blacklistBadge').textContent = blacklistCount;
+                
+            } catch (error) {
+                console.error('Erro ao atualizar badges:', error);
+            }
+        }
+
         // ========== LISTA NEGRA ==========
         function toggleBlacklist() {
             const checkbox = document.getElementById('blacklist');
@@ -1394,6 +1622,90 @@
             
             alertsContainer.appendChild(warning);
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function loadBlacklistVisitors() {
+            try {
+                showLoading('Carregando lista negra...');
+                
+                const blacklistVisitors = visitorsData.filter(v => v.blacklist === true);
+                
+                if (blacklistVisitors.length === 0) {
+                    const snapshot = await db.collection('visitantes')
+                        .where('blacklist', '==', true)
+                        .orderBy('entrada', 'desc')
+                        .get();
+                    
+                    blacklistVisitors.push(...snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
+                    })));
+                }
+                
+                hideLoading();
+                displayBlacklistVisitors(blacklistVisitors);
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao carregar lista negra:', error);
+                alert('❌ Erro ao carregar: ' + error.message);
+            }
+        }
+
+        function displayBlacklistVisitors(visitors) {
+            const list = document.getElementById('blacklistList');
+            
+            if (visitors.length === 0) {
+                list.innerHTML = `<div class="empty-state">
+                    <div class="icon">✅</div>
+                    <h3>Lista vazia</h3>
+                    <p>Nenhuma pessoa na lista negra</p>
+                </div>`;
+                return;
+            }
+
+            list.innerHTML = visitors.map(v => `
+                <div class="visitor-card blacklist">
+                    <img src="${v.fotoUrl || ''}" class="visitor-photo" onerror="this.style.display='none'">
+                    <div class="visitor-info">
+                        <div class="visitor-name">${v.nome}</div>
+                        <div class="visitor-detail">📄 ${v.cpf || 'N/A'}</div>
+                        <div class="visitor-detail">🏢 ${v.empresa || v.tipo}</div>
+                        <div class="visitor-detail">🚗 ${v.placa || 'Sem placa'}</div>
+                        <div class="visitor-detail">📍 ${v.destino || 'N/A'}</div>
+                        <div class="visitor-detail">🕐 Última entrada: ${v.entrada}</div>
+                        <span class="blacklist-badge" style="margin-top: 6px;">⚠️ LISTA NEGRA</span>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="removeFromBlacklist('${v.id}')">❌ Remover</button>
+                </div>
+            `).join('');
+        }
+
+        async function removeFromBlacklist(visitanteId) {
+            if (!confirm('Remover da lista negra?')) {
+                return;
+            }
+            
+            try {
+                showLoading('Removendo...');
+                
+                await db.collection('visitantes').doc(visitanteId).update({
+                    blacklist: false
+                });
+                
+                hideLoading();
+                alert('✅ Removido da lista negra!');
+                
+                await loadVisitors();
+                await loadBlacklistVisitors();
+                updateDashboardBadges();
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro:', error);
+                alert('❌ Erro: ' + error.message);
+            }
         }
 
         // ========== VERIFICAR ENTRADA DUPLICADA ==========
@@ -1473,7 +1785,6 @@
             
             if (!name || name.length < 2) {
                 list.classList.remove('show');
-                // Limpar alertas quando limpar o campo
                 document.getElementById('dynamicAlerts').innerHTML = '';
                 return;
             }
@@ -1483,9 +1794,21 @@
             searchNameAutocompleteTimer = setTimeout(async () => {
                 console.log(`🔍 Buscando visitante por nome: "${name}"`);
                 
-                const nameLower = name.toLowerCase();
+                const normalizeString = (str) => {
+                    if (!str) return '';
+                    return str.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .trim();
+                };
+                
+                const nameNormalized = normalizeString(name);
+                
                 const localResults = visitorsData
-                    .filter(v => v.nome && v.nome.toLowerCase().includes(nameLower))
+                    .filter(v => {
+                        const nomeNorm = normalizeString(v.nome || '');
+                        return nomeNorm.includes(nameNormalized);
+                    })
                     .sort((a, b) => {
                         const dateA = new Date(a.entrada);
                         const dateB = new Date(b.entrada);
@@ -1500,8 +1823,7 @@
 
                 try {
                     const snapshot = await db.collection('visitantes')
-                        .orderBy('entrada', 'desc')
-                        .limit(50)
+                        .limit(100)
                         .get();
                     
                     const allVisitors = snapshot.docs.map(doc => ({
@@ -1510,9 +1832,17 @@
                         entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
                     }));
                     
-                    const filtered = allVisitors.filter(v => 
-                        v.nome && v.nome.toLowerCase().includes(nameLower)
-                    ).slice(0, 10);
+                    const filtered = allVisitors
+                        .filter(v => {
+                            const nomeNorm = normalizeString(v.nome || '');
+                            return nomeNorm.includes(nameNormalized);
+                        })
+                        .sort((a, b) => {
+                            const dateA = new Date(a.entrada);
+                            const dateB = new Date(b.entrada);
+                            return dateB - dateA;
+                        })
+                        .slice(0, 10);
                     
                     if (filtered.length > 0) {
                         displayNameAutocomplete(filtered, list);
@@ -1530,7 +1860,6 @@
                 const blacklistClass = v.blacklist ? 'blacklist' : '';
                 const blacklistBadge = v.blacklist ? '<span style="color: #E74C3C; font-weight: 700;"> ⚠️ LISTA NEGRA</span>' : '';
                 
-                // Escapar aspas simples no JSON
                 const visitorJson = JSON.stringify(v).replace(/'/g, "\'");
                 
                 return `<div class="autocomplete-item ${blacklistClass}" onclick='selectVisitorFromName(${visitorJson})'>
@@ -1583,16 +1912,6 @@
 
         function setConfigPassword(password) {
             localStorage.setItem('zecure_config_password', password);
-        }
-
-        function showScreenWithAuth(screen) {
-            if (screen === 'config') {
-                document.getElementById('configPasswordModal').classList.add('active');
-                document.getElementById('configPasswordInput').value = '';
-                document.getElementById('configPasswordInput').focus();
-            } else {
-                showScreen(screen);
-            }
         }
 
         function closeConfigPasswordModal() {
@@ -1742,7 +2061,6 @@
                     for (let i = 0; i < data.length; i++) {
                         const row = data[i];
                         
-                        // Pega primeiro valor não vazio
                         const valores = Object.values(row).filter(v => v && v.trim && v.trim() !== '');
                         
                         if (valores.length === 0) {
@@ -1752,7 +2070,6 @@
                         
                         const endereco = valores[0];
                         
-                        // Tenta extrair nome
                         let nome = 'Morador';
                         const match = endereco.match(/[-]\s*(.+?),/);
                         if (match) {
@@ -1820,6 +2137,7 @@
             applyCustomization();
             setupCPFMask();
             loadData();
+            updateDashboardBadges();
         }
 
         function changeOperator() {
@@ -1840,6 +2158,7 @@
                 ]);
                 
                 console.log('✅ Dados carregados!');
+                updateDashboardBadges();
             } catch (error) {
                 console.error('❌ Erro ao carregar dados:', error);
                 alert('⚠️ Erro ao conectar ao Firebase. Verifique sua conexão.');
@@ -1881,6 +2200,7 @@
                 
                 filteredVisitorsData = visitorsData;
                 updateStats();
+                updateDashboardBadges();
                 
                 console.log(`✅ ${visitorsData.length} visitantes carregados`);
             } catch (error) {
@@ -2033,49 +2353,7 @@
             }
         }
 
-        // ========== NAVEGAÇÃO ==========
-        function showScreen(screen) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
-            const screens = {
-                'cadastro': 'cadastroScreen',
-                'monitoramento': 'monitoramentoScreen',
-                'saida': 'saidaScreen',
-                'relatorio': 'relatorioScreen',
-                'config': 'configScreen'
-            };
-            
-            document.getElementById(screens[screen]).classList.add('active');
-            
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                if (item.textContent.toLowerCase().includes(screen === 'cadastro' ? 'entrada' : screen)) {
-                    item.classList.add('active');
-                }
-            });
-            
-            if (screen !== 'cadastro') {
-                closeCamera();
-                // Limpar alertas quando sair da tela de cadastro
-                document.getElementById('dynamicAlerts').innerHTML = '';
-            }
-            
-            if (screen === 'monitoramento') {
-                loadMonitoring();
-            } else {
-                stopMonitoringAutoRefresh();
-            }
-            
-            if (screen === 'relatorio') {
-                loadReport();
-            } else if (screen === 'saida') {
-                loadVisitors();
-            } else if (screen === 'config') {
-                loadCustomizationForm();
-            }
-        }
-
+// ========== CONTINUA NO PRÓXIMO BLOCO (PARTE 2) ==========
         // ========== CÂMERA PRINCIPAL (QUALIDADE AUMENTADA) ==========
         async function openCamera() {
             try {
@@ -2378,318 +2656,63 @@
         }
 
         // ========== BUSCA E AUTO-PREENCHIMENTO POR CPF (COM VERIFICAÇÕES) ==========
-        // ========== BUSCA POR CPF (CASE-INSENSITIVE) ==========
-async function searchVisitorByCPF(cpf) {
-    const cpfLimpo = cpf.replace(/[^\d]/g, '');
-    
-    if (cpfLimpo.length !== 11) {
-        return;
-    }
-    
-    // Verificar entrada duplicada
-    await checkDuplicateEntry(cpf);
-    
-    // Normalizar CPF para comparação (sem pontos e hífens)
-    const localVisitor = visitorsData
-        .filter(v => {
-            const vCpf = (v.cpf || '').replace(/[^\d]/g, '');
-            return vCpf === cpfLimpo;
-        })
-        .sort((a, b) => {
-            const dateA = new Date(a.entrada);
-            const dateB = new Date(b.entrada);
-            return dateB - dateA;
-        })[0];
-
-    if (localVisitor) {
-        autoFillVisitorData(localVisitor);
-        return;
-    }
-
-    showLoading('Buscando histórico...');
-    
-    try {
-        // BUSCA SEM orderBy (evita erro de índice)
-        const snapshot = await db.collection('visitantes')
-            .where('cpf', '==', cpf)
-            .limit(10)
-            .get();
-        
-        hideLoading();
-        
-        if (!snapshot.empty) {
-            // ORDENAR LOCALMENTE
-            const allVisitors = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                entrada: doc.data().entrada?.toDate() || new Date(0)
-            }));
+        async function searchVisitorByCPF(cpf) {
+            const cpfLimpo = cpf.replace(/[^\d]/g, '');
             
-            allVisitors.sort((a, b) => b.entrada - a.entrada);
+            if (cpfLimpo.length !== 11) {
+                return;
+            }
             
-            const visitor = {
-                ...allVisitors[0],
-                entrada: allVisitors[0].entrada.toLocaleString('pt-BR')
-            };
+            await checkDuplicateEntry(cpf);
             
-            autoFillVisitorData(visitor);
-        }
-        
-    } catch (error) {
-        hideLoading();
-        console.error('Erro ao buscar visitante:', error);
-    }
-}
-
-// ========== BUSCA POR NOME (CASE-INSENSITIVE) ==========
-async function searchVisitorByName(name) {
-    const list = document.getElementById('nameAutocompleteList');
-    
-    if (!name || name.length < 2) {
-        list.classList.remove('show');
-        document.getElementById('dynamicAlerts').innerHTML = '';
-        return;
-    }
-
-    clearTimeout(searchNameAutocompleteTimer);
-    
-    searchNameAutocompleteTimer = setTimeout(async () => {
-        console.log(`🔍 Buscando visitante por nome: "${name}"`);
-        
-        // NORMALIZAR PARA CASE-INSENSITIVE + SEM ACENTOS
-        const normalizeString = (str) => {
-            if (!str) return '';
-            return str
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .trim();
-        };
-        
-        const nameNormalized = normalizeString(name);
-        
-        const localResults = visitorsData
-            .filter(v => {
-                const nomeNorm = normalizeString(v.nome || '');
-                return nomeNorm.includes(nameNormalized);
-            })
-            .sort((a, b) => {
-                const dateA = new Date(a.entrada);
-                const dateB = new Date(b.entrada);
-                return dateB - dateA;
-            })
-            .slice(0, 10);
-
-        if (localResults.length > 0) {
-            displayNameAutocomplete(localResults, list);
-            return;
-        }
-
-        try {
-            const snapshot = await db.collection('visitantes')
-                .limit(100)
-                .get();
-            
-            const allVisitors = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
-            }));
-            
-            const filtered = allVisitors
+            const localVisitor = visitorsData
                 .filter(v => {
-                    const nomeNorm = normalizeString(v.nome || '');
-                    return nomeNorm.includes(nameNormalized);
+                    const vCpf = (v.cpf || '').replace(/[^\d]/g, '');
+                    return vCpf === cpfLimpo;
                 })
                 .sort((a, b) => {
                     const dateA = new Date(a.entrada);
                     const dateB = new Date(b.entrada);
                     return dateB - dateA;
-                })
-                .slice(0, 10);
-            
-            if (filtered.length > 0) {
-                displayNameAutocomplete(filtered, list);
-            } else {
-                list.classList.remove('show');
-            }
-        } catch (error) {
-            console.error('Erro ao buscar por nome:', error);
-        }
-    }, 300);
-}
+                })[0];
 
-// ========== BUSCA DE MORADORES (CASE-INSENSITIVE) ==========
-async function searchResidents(query) {
-    const list = document.getElementById('autocompleteList');
-    
-    if (!query || query.length < 2) {
-        list.classList.remove('show');
-        return;
-    }
-
-    clearTimeout(searchResidentsTimer);
-    
-    searchResidentsTimer = setTimeout(async () => {
-        console.log(`🔍 Buscando morador: "${query}"`);
-        
-        // NORMALIZAR (case-insensitive + sem acentos)
-        const normalizeString = (str) => {
-            if (!str) return '';
-            return str
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .trim();
-        };
-        
-        const queryNormalized = normalizeString(query);
-        
-        if (residentsData && residentsData.length > 0) {
-            const filtered = residentsData.filter(r => {
-                const nomeNorm = normalizeString(r.nome || '');
-                const enderecoNorm = normalizeString(r.endereco || '');
-                
-                return nomeNorm.includes(queryNormalized) || 
-                       enderecoNorm.includes(queryNormalized);
-            });
-
-            if (filtered.length > 0) {
-                displayResidentsList(filtered, list);
+            if (localVisitor) {
+                autoFillVisitorData(localVisitor);
                 return;
             }
-        }
 
-        try {
-            const snapshot = await db.collection('residentes')
-                .limit(100)
-                .get();
+            showLoading('Buscando histórico...');
             
-            const allResidents = snapshot.docs.map(doc => doc.data());
-            
-            const filtered = allResidents.filter(r => {
-                const nomeNorm = normalizeString(r.nome || '');
-                const enderecoNorm = normalizeString(r.endereco || '');
+            try {
+                const snapshot = await db.collection('visitantes')
+                    .where('cpf', '==', cpf)
+                    .limit(10)
+                    .get();
                 
-                return nomeNorm.includes(queryNormalized) || 
-                       enderecoNorm.includes(queryNormalized);
-            });
-            
-            if (filtered.length > 0) {
-                displayResidentsList(filtered, list);
-            } else {
-                list.innerHTML = `<div class="autocomplete-item" style="color: var(--danger); text-align: center; padding: 16px;">
-                    ❌ Nenhum morador encontrado
-                </div>`;
-                list.classList.add('show');
+                hideLoading();
+                
+                if (!snapshot.empty) {
+                    const allVisitors = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                        entrada: doc.data().entrada?.toDate() || new Date(0)
+                    }));
+                    
+                    allVisitors.sort((a, b) => b.entrada - a.entrada);
+                    
+                    const visitor = {
+                        ...allVisitors[0],
+                        entrada: allVisitors[0].entrada.toLocaleString('pt-BR')
+                    };
+                    
+                    autoFillVisitorData(visitor);
+                }
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao buscar visitante:', error);
             }
-        } catch (error) {
-            console.error('Erro ao buscar residente:', error);
         }
-    }, 300);
-}
-
-// ========== BUSCA PARA SAÍDA (CASE-INSENSITIVE) ==========
-async function searchByName(nome) {
-    if (!nome || nome.length < 2) {
-        document.getElementById('exitResultsList').innerHTML = '';
-        return;
-    }
-    
-    clearTimeout(searchNameTimer);
-    
-    searchNameTimer = setTimeout(async () => {
-        const normalizeString = (str) => {
-            if (!str) return '';
-            return str
-                .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
-                .trim();
-        };
-        
-        const nomeNormalized = normalizeString(nome);
-        
-        const localResults = visitorsData.filter(v => 
-            v.status === 'ATIVO' && 
-            normalizeString(v.nome || '').includes(nomeNormalized)
-        );
-
-        if (localResults.length > 0) {
-            displayExitResults(localResults);
-            return;
-        }
-
-        try {
-            showLoading('Buscando...');
-            
-            const snapshot = await db.collection('visitantes')
-                .where('status', '==', 'ATIVO')
-                .limit(100)
-                .get();
-            
-            const allVisitors = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
-            }));
-            
-            const results = allVisitors.filter(v => 
-                normalizeString(v.nome || '').includes(nomeNormalized)
-            );
-            
-            hideLoading();
-            displayExitResults(results);
-        } catch (error) {
-            hideLoading();
-            console.error('Erro:', error);
-        }
-    }, 400);
-}
-
-async function searchByCPF(cpf) {
-    if (!cpf || cpf.replace(/[^\d]/g, '').length < 3) {
-        document.getElementById('exitResultsList').innerHTML = '';
-        return;
-    }
-    
-    clearTimeout(searchCPFTimer);
-    
-    searchCPFTimer = setTimeout(async () => {
-        const cpfLimpo = cpf.replace(/[^\d]/g, '');
-        
-        const localResults = visitorsData.filter(v => {
-            const vCpf = (v.cpf || '').replace(/[^\d]/g, '');
-            return v.status === 'ATIVO' && vCpf.includes(cpfLimpo);
-        });
-
-        if (localResults.length > 0) {
-            displayExitResults(localResults);
-            return;
-        }
-
-        try {
-            showLoading('Buscando...');
-            
-            const snapshot = await db.collection('visitantes')
-                .where('status', '==', 'ATIVO')
-                .where('cpf', '==', cpf)
-                .get();
-            
-            const results = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
-            }));
-            
-            hideLoading();
-            displayExitResults(results);
-        } catch (error) {
-            hideLoading();
-            console.error('Erro:', error);
-        }
-    }, 400);
-}
 
         function autoFillVisitorData(visitor) {
             if (visitor.nome) document.getElementById('fullName').value = visitor.nome;
@@ -2699,7 +2722,6 @@ async function searchByCPF(cpf) {
             if (visitor.cor) document.getElementById('vehicleColor').value = visitor.cor;
             if (visitor.modelo) document.getElementById('vehicleModel').value = visitor.modelo;
             
-            // LISTA NEGRA
             if (visitor.blacklist) {
                 document.getElementById('blacklist').checked = true;
                 showBlacklistWarning(visitor.nome);
@@ -2772,19 +2794,18 @@ async function searchByCPF(cpf) {
             
             searchResidentsTimer = setTimeout(async () => {
                 console.log(`🔍 Buscando morador: "${query}"`);
-                console.log(`📊 Total de residentes: ${residentsData.length}`);
+                
+                const normalizeString = (str) => {
+                    if (!str) return '';
+                    return str.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .trim();
+                };
+                
+                const queryNormalized = normalizeString(query);
                 
                 if (residentsData && residentsData.length > 0) {
-                    const normalizeString = (str) => {
-                        if (!str) return '';
-                        return str.toLowerCase()
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .trim();
-                    };
-                    
-                    const queryNormalized = normalizeString(query);
-                    
                     const filtered = residentsData.filter(r => {
                         const nomeNorm = normalizeString(r.nome || '');
                         const enderecoNorm = normalizeString(r.endereco || '');
@@ -2792,8 +2813,6 @@ async function searchByCPF(cpf) {
                         return nomeNorm.includes(queryNormalized) || 
                                enderecoNorm.includes(queryNormalized);
                     });
-
-                    console.log(`📋 Resultados encontrados: ${filtered.length}`);
 
                     if (filtered.length > 0) {
                         displayResidentsList(filtered, list);
@@ -2808,11 +2827,13 @@ async function searchByCPF(cpf) {
                     
                     const allResidents = snapshot.docs.map(doc => doc.data());
                     
-                    const queryLower = query.toLowerCase();
-                    const filtered = allResidents.filter(r => 
-                        (r.nome && r.nome.toLowerCase().includes(queryLower)) ||
-                        (r.endereco && r.endereco.toLowerCase().includes(queryLower))
-                    );
+                    const filtered = allResidents.filter(r => {
+                        const nomeNorm = normalizeString(r.nome || '');
+                        const enderecoNorm = normalizeString(r.endereco || '');
+                        
+                        return nomeNorm.includes(queryNormalized) || 
+                               enderecoNorm.includes(queryNormalized);
+                    });
                     
                     if (filtered.length > 0) {
                         displayResidentsList(filtered, list);
@@ -2891,7 +2912,6 @@ async function searchByCPF(cpf) {
                 return;
             }
 
-            // VERIFICAR ENTRADA DUPLICADA ANTES DE SALVAR
             const isDuplicate = await checkDuplicateEntry(cpf);
             if (isDuplicate) {
                 if (!confirm('⚠️ Pessoa JÁ está ATIVA no sistema.\n\nDeseja registrar entrada mesmo assim?\n\n(RECOMENDADO: Registrar saída primeiro)')) {
@@ -2951,7 +2971,6 @@ async function searchByCPF(cpf) {
                 document.getElementById('cameraContainer').style.display = 'none';
                 document.getElementById('blacklist').checked = false;
                 
-                // Limpar alertas
                 document.getElementById('dynamicAlerts').innerHTML = '';
                 
                 const notification = document.querySelector('.autofill-notification');
@@ -2960,6 +2979,7 @@ async function searchByCPF(cpf) {
                 }
                 
                 await loadVisitors();
+                updateDashboardBadges();
                 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 
@@ -3060,10 +3080,19 @@ async function searchByCPF(cpf) {
             clearTimeout(searchNameTimer);
             
             searchNameTimer = setTimeout(async () => {
-                const queryLower = nome.toLowerCase();
+                const normalizeString = (str) => {
+                    if (!str) return '';
+                    return str.toLowerCase()
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .trim();
+                };
+                
+                const nomeNormalized = normalizeString(nome);
+                
                 const localResults = visitorsData.filter(v => 
                     v.status === 'ATIVO' && 
-                    v.nome.toLowerCase().includes(queryLower)
+                    normalizeString(v.nome || '').includes(nomeNormalized)
                 );
 
                 if (localResults.length > 0) {
@@ -3076,15 +3105,18 @@ async function searchByCPF(cpf) {
                     
                     const snapshot = await db.collection('visitantes')
                         .where('status', '==', 'ATIVO')
-                        .where('nome', '>=', nome)
-                        .where('nome', '<=', nome + '\uf8ff')
+                        .limit(100)
                         .get();
                     
-                    const results = snapshot.docs.map(doc => ({
+                    const allVisitors = snapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data(),
                         entrada: doc.data().entrada?.toDate().toLocaleString('pt-BR') || ''
                     }));
+                    
+                    const results = allVisitors.filter(v => 
+                        normalizeString(v.nome || '').includes(nomeNormalized)
+                    );
                     
                     hideLoading();
                     displayExitResults(results);
@@ -3106,10 +3138,10 @@ async function searchByCPF(cpf) {
             searchCPFTimer = setTimeout(async () => {
                 const cpfLimpo = cpf.replace(/[^\d]/g, '');
                 
-                const localResults = visitorsData.filter(v => 
-                    v.status === 'ATIVO' && 
-                    v.cpf.replace(/[^\d]/g, '').includes(cpfLimpo)
-                );
+                const localResults = visitorsData.filter(v => {
+                    const vCpf = (v.cpf || '').replace(/[^\d]/g, '');
+                    return v.status === 'ATIVO' && vCpf.includes(cpfLimpo);
+                });
 
                 if (localResults.length > 0) {
                     displayExitResults(localResults);
@@ -3323,6 +3355,7 @@ async function searchByCPF(cpf) {
                 document.getElementById('exitResultsList').innerHTML = '';
                 
                 await loadVisitors();
+                updateDashboardBadges();
                 
             } catch (error) {
                 hideLoading();
@@ -3566,4 +3599,3 @@ async function searchByCPF(cpf) {
     </script>
 </body>
 </html>
-
