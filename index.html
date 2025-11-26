@@ -1132,18 +1132,34 @@
 </head>
 <body>
     <!-- TELA DE LOGIN OPERADOR -->
-    <div id="operatorLoginScreen" class="login-container">
-        <div class="login-box">
-            <div class="logo-large" id="loginLogo">🔐</div>
-            <h2 id="loginTitle">ZECURE</h2>
-            <p>Sistema de Controle de Acesso</p>
-            <div class="form-group" style="text-align: left;">
-                <label>Nome do Operador *</label>
-                <input type="text" id="operatorName" placeholder="Digite seu nome" required>
-            </div>
-            <button class="btn btn-primary" onclick="loginOperator()">🚀 Iniciar Sistema</button>
+    <!-- TELA DE LOGIN COM AUTENTICAÇÃO -->
+<div id="operatorLoginScreen" class="login-container">
+    <div class="login-box">
+        <div class="logo-large" id="loginLogo">🔐</div>
+        <h2 id="loginTitle">ZECURE</h2>
+        <p>Sistema de Controle de Acesso</p>
+        
+        <div class="form-group" style="text-align: left;">
+            <label>Email *</label>
+            <input type="email" id="loginEmail" placeholder="usuario@email.com" required>
         </div>
+        
+        <div class="form-group" style="text-align: left;">
+            <label>Senha *</label>
+            <input type="password" id="loginPassword" placeholder="Digite sua senha" required>
+        </div>
+        
+        <button class="btn btn-primary" onclick="authenticateUser()">🔐 Entrar</button>
+        
+        <div id="loginError" style="display: none; margin-top: 14px; padding: 12px; background: rgba(231, 76, 60, 0.1); border-left: 4px solid #E74C3C; border-radius: 8px; color: #E74C3C; font-size: 0.85em; text-align: left;">
+        </div>
+        
+        <p style="font-size: 0.75em; color: var(--gray); margin-top: 20px;">
+            💡 Usuário padrão: <strong>admin@zecure.com</strong><br>
+            Senha: <strong>admin123</strong>
+        </p>
     </div>
+</div>
 
     <!-- SISTEMA PRINCIPAL -->
     <div id="mainSystem" style="display: none;">
@@ -1160,14 +1176,14 @@
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 5px;">
-                    <div class="operator-badge" id="operatorBadge">
-                        <span>👤</span>
-                        <span id="operatorNameDisplay"></span>
-                    </div>
-                    <div class="sync-status online" id="syncStatus">
-                        <div class="sync-dot"></div>
-                        <span>Firebase</span>
-                    </div>
+    <div class="operator-badge" id="operatorBadge" onclick="logout()" style="cursor: pointer;" title="Clique para sair">
+        <span>👤</span>
+        <span id="operatorNameDisplay"></span>
+    </div>
+    <div class="sync-status online" id="syncStatus">
+        <div class="sync-dot"></div>
+        <span>Firebase</span>
+                </div>
                 </div>
             </div>
         </div>
@@ -1238,6 +1254,19 @@
                         <div class="dashboard-card-icon">⚙️</div>
                         <div class="dashboard-card-title">CONFIGURAÇÕES</div>
                         <div class="dashboard-card-desc">Sistema e operador</div>
+                    </div>
+                                        <!-- Card: UNIDADES (NOVO) -->
+                    <div class="dashboard-card info" onclick="showScreen('unidades')">
+                        <div class="dashboard-card-icon">🏢</div>
+                        <div class="dashboard-card-title">UNIDADES</div>
+                        <div class="dashboard-card-desc">Gerenciar endereços do condomínio</div>
+                    </div>
+
+                    <!-- Card: RESIDENTES (NOVO) -->
+                    <div class="dashboard-card warning" onclick="showScreen('residentes')">
+                        <div class="dashboard-card-icon">🏠</div>
+                        <div class="dashboard-card-title">RESIDENTES</div>
+                        <div class="dashboard-card-desc">Cadastro de moradores</div>
                     </div>
                 </div>
             </div>
@@ -1685,11 +1714,14 @@
                     
                     <div style="height: 20px;"></div>
                     
-                    <h4 style="font-size: 0.85em; margin-bottom: 10px; color: var(--dark);">📥 Importar Moradores</h4>
+                        <h4 style="font-size: 0.85em; margin-bottom: 10px; color: var(--dark);">📥 Importar Moradores</h4>
                     <div class="csv-upload-zone" onclick="document.getElementById('csvResidentesInput').click()">
                         <div style="font-size: 2em; margin-bottom: 8px;">📂</div>
                         <div style="font-size: 0.85em; font-weight: 600; margin-bottom: 4px;">Clique para selecionar CSV</div>
-                        <div style="font-size: 0.7em; color: var(--gray);">Colunas: endereco (obrigatório), nome, telefone, email, cpf</div>
+                        <div style="font-size: 0.7em; color: var(--gray); line-height: 1.5;">
+                            <strong style="color: var(--primary);">Colunas:</strong> endereco (obrigatório), nome, cpf, telefone, email, foto<br>
+                            <span style="font-size: 0.9em; color: var(--success);">💡 O endereço vira unidade automaticamente</span>
+                        </div>
                     </div>
                     <input type="file" id="csvResidentesInput" accept=".csv" onchange="importResidentesCSV(this.files[0])">
                     <div id="residentesImportResult" class="import-result" style="display: none;"></div>
@@ -1766,6 +1798,49 @@
             <div id="facialSearchResults"></div>
         </div>
     </div>
+                <!-- ========== TELA DE UNIDADES (NOVA) ========== -->
+            <div id="unidadesScreen" class="screen">
+                <div class="card">
+                    <div class="card-title">🏢 Gerenciamento de Unidades</div>
+                    <button class="btn btn-success" onclick="openAddUnidadeModal()">➕ Adicionar Unidade</button>
+                    <button class="btn btn-info" onclick="loadUnidades()">🔄 Atualizar</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔍 Buscar Unidade</div>
+                    <div class="form-group">
+                        <input type="text" id="searchUnidade" placeholder="Digite o endereço..." oninput="searchUnidadesForManagement(this.value)">
+                    </div>
+                </div>
+
+                <div id="unidadesList"></div>
+            </div>
+
+            <!-- ========== TELA DE RESIDENTES (NOVA) ========== -->
+            <div id="residentesScreen" class="screen">
+                <div class="card">
+                    <div class="card-title">🏠 Gerenciamento de Residentes</div>
+                    <button class="btn btn-success" onclick="openAddResidentModal()">➕ Adicionar Residente</button>
+                    <button class="btn btn-info" onclick="loadResidentsForManagement()">🔄 Atualizar</button>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📊 Exportar Dados</div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="downloadResidentsPDF()">📄 PDF</button>
+                        <button class="btn btn-success" onclick="downloadResidentsCSV()">📊 CSV</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔍 Buscar Residente</div>
+                    <div class="form-group">
+                        <input type="text" id="searchResident" placeholder="Digite nome, CPF ou telefone..." oninput="searchResidentsForManagement(this.value)">
+                    </div>
+                </div>
+
+                <div id="residentsList"></div>
+            </div>
 
     <!-- MODAL ADICIONAR USUÁRIO (NOVO) -->
     <div class="modal" id="addUserModal">
@@ -1799,7 +1874,7 @@
                     </div>
                 </div>
 
-                <div class="card">
+                                <div class="card">
                     <div class="card-title">🔐 Permissões de Módulos</div>
                     <p style="font-size: 0.75em; color: var(--gray); margin-bottom: 10px;">
                         Selecione quais módulos este usuário poderá acessar:
@@ -1831,6 +1906,18 @@
                             <label for="perm_listanegra">⚠️ Lista Negra - Gerenciar alertas</label>
                         </div>
                         
+                        <!-- ========== UNIDADES (NOVO) ========== -->
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm_unidades" name="permissions" value="unidades">
+                            <label for="perm_unidades">🏢 Unidades - Gerenciar endereços</label>
+                        </div>
+                        
+                        <!-- ========== RESIDENTES (NOVO) ========== -->
+                        <div class="permission-item">
+                            <input type="checkbox" id="perm_residentes" name="permissions" value="residentes">
+                            <label for="perm_residentes">🏠 Residentes - Cadastro de moradores</label>
+                        </div>
+                        
                         <div class="permission-item">
                             <input type="checkbox" id="perm_usuarios" name="permissions" value="usuarios">
                             <label for="perm_usuarios">👥 Usuários - Gerenciar contas</label>
@@ -1855,6 +1942,114 @@
                 <div class="btn-group">
                     <button type="submit" class="btn btn-success">💾 Salvar Usuário</button>
                     <button type="button" class="btn btn-outline" onclick="closeAddUserModal()">✕ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+        <!-- ========== MODAL: ADICIONAR/EDITAR UNIDADE (NOVO) ========== -->
+    <div class="modal" id="addUnidadeModal">
+        <div class="modal-header">
+            <h3 id="unidadeModalTitle">➕ Adicionar Unidade</h3>
+            <button class="close-btn" onclick="closeAddUnidadeModal()">✕</button>
+        </div>
+        <div class="modal-content">
+            <form id="addUnidadeForm" onsubmit="saveUnidade(event)">
+                <div class="card">
+                    <div class="card-title">🏢 Dados da Unidade</div>
+                    
+                    <div class="form-group">
+                        <label>Endereço/Identificação *</label>
+                        <input type="text" id="unidadeEndereco" placeholder="Ex: Bloco A - Apto 101" required>
+                        <small style="font-size: 0.75em; color: var(--gray);">Campo obrigatório</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <textarea id="unidadeObservacao" placeholder="Informações adicionais sobre a unidade"></textarea>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">💾 Salvar</button>
+                    <button type="button" class="btn btn-outline" onclick="closeAddUnidadeModal()">✕ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: ADICIONAR/EDITAR RESIDENTE (NOVO) ========== -->
+    <div class="modal" id="addResidentModal">
+        <div class="modal-header">
+            <h3 id="residentModalTitle">➕ Adicionar Residente</h3>
+            <button class="close-btn" onclick="closeAddResidentModal()">✕</button>
+        </div>
+        <div class="modal-content">
+            <form id="addResidentForm" onsubmit="saveResident(event)">
+                <!-- FOTO -->
+                <div class="card">
+                    <div class="card-title">📸 Foto do Residente</div>
+                    
+                    <button type="button" class="btn btn-info" onclick="openResidentCamera()" id="openResidentCameraBtn">
+                        📷 Abrir Câmera
+                    </button>
+                    
+                    <div class="camera-container" id="residentCameraContainer" style="display: none;">
+                        <video id="residentVideo" autoplay playsinline muted></video>
+                        <img id="residentPhotoPreview" class="photo-preview" style="display:none;">
+                        <canvas id="residentCanvas" style="display:none;"></canvas>
+                        <button type="button" class="flip-btn" onclick="flipResidentCamera()">🔄</button>
+                    </div>
+                    
+                    <div id="residentPhotoContainer" style="display: none;">
+                        <img id="residentLoadedPhoto" class="photo-preview" style="width: 100%; border-radius: 12px; margin: 10px 0;">
+                    </div>
+                    
+                    <div class="btn-group" id="residentCameraControls" style="display: none;">
+                        <button type="button" class="btn btn-primary" onclick="takeResidentPhoto()">📷 Capturar</button>
+                        <button type="button" class="btn btn-outline" onclick="resetResidentPhoto()">🔄 Refazer</button>
+                    </div>
+                    
+                    <button type="button" class="btn btn-warning" onclick="changeResidentPhoto()" id="changeResidentPhotoBtn" style="display: none; margin-top: 10px;">
+                        🔄 Trocar Foto
+                    </button>
+                </div>
+
+                <!-- DADOS DO RESIDENTE -->
+                <div class="card">
+                    <div class="card-title">👤 Dados do Residente</div>
+                    
+                    <div class="form-group">
+                        <label>Unidade *</label>
+                        <select id="residentUnidade" required>
+                            <option value="">Selecione a unidade</option>
+                        </select>
+                        <small style="font-size: 0.75em; color: var(--gray);">Campo obrigatório</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="residentName" placeholder="Digite o nome completo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>CPF</label>
+                        <input type="text" id="residentCPF" maxlength="14" placeholder="000.000.000-00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="tel" id="residentPhone" placeholder="(00) 00000-0000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="residentEmail" placeholder="email@exemplo.com">
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-success">💾 Salvar</button>
+                    <button type="button" class="btn btn-outline" onclick="closeAddResidentModal()">✕ Cancelar</button>
                 </div>
             </form>
         </div>
@@ -1909,6 +2104,12 @@ console.log('✅ Cloudinary configurado:', CLOUDINARY_CONFIG.cloudName);
         let searchNameTimer = null;
         let searchCPFTimer = null;
         let searchPlateTimer = null;
+        let unidadesData = [];
+        let currentResidentId = null;
+        let currentUnidadeId = null;
+        let residentVideoStream = null;
+        let residentFacingMode = 'user';
+        let residentCapturedPhoto = null;
 
         let customization = JSON.parse(localStorage.getItem('zecure_customization')) || {
             systemName: 'ZECURE',
@@ -1920,49 +2121,61 @@ console.log('✅ Cloudinary configurado:', CLOUDINARY_CONFIG.cloudName);
 
         // ========== NAVEGAÇÃO ==========
         function showScreen(screenId) {
-            stopMonitoringAutoRefresh();
-            
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId + 'Screen').classList.add('active');
-            currentScreen = screenId + 'Screen';
-            
-            const backButton = document.getElementById('backButton');
-            if (screenId === 'home') {
-                backButton.style.display = 'none';
-            } else {
-                backButton.style.display = 'flex';
-            }
-            
-            if (screenId === 'cadastro') {
-                loadCustomizationForm();
-            }
-            else if (screenId === 'monitoramento') {
-                loadMonitoring();
-            }
-            else if (screenId === 'saida') {
-                document.getElementById('searchName').value = '';
-                document.getElementById('searchCPF').value = '';
-                document.getElementById('searchPlate').value = '';
-                document.getElementById('exitResultsList').innerHTML = '';
-            }
-            else if (screenId === 'relatorio') {
-                loadReport();
-            }
-            else if (screenId === 'listanegra') {
-                loadBlacklistVisitors();
-            }
-            else if (screenId === 'usuarios') {
-                loadUsers();
-            }
-            else if (screenId === 'atendimento') {
-                loadHikvisionConfig();
-            }
-            else if (screenId === 'config') {
-                loadCustomizationForm();
-            }
-            
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    // VERIFICAR PERMISSÃO
+    if (!hasPermission(screenId)) {
+        alert('❌ Você não tem permissão para acessar este módulo!');
+        return;
+    }
+    
+    stopMonitoringAutoRefresh();
+    
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId + 'Screen').classList.add('active');
+    currentScreen = screenId + 'Screen';
+    
+    const backButton = document.getElementById('backButton');
+    if (screenId === 'home') {
+        backButton.style.display = 'none';
+    } else {
+        backButton.style.display = 'flex';
+    }
+    
+    if (screenId === 'cadastro') {
+        loadCustomizationForm();
+    }
+    else if (screenId === 'monitoramento') {
+        loadMonitoring();
+    }
+    else if (screenId === 'saida') {
+        document.getElementById('searchName').value = '';
+        document.getElementById('searchCPF').value = '';
+        document.getElementById('searchPlate').value = '';
+        document.getElementById('exitResultsList').innerHTML = '';
+    }
+    else if (screenId === 'relatorio') {
+        loadReport();
+    }
+    else if (screenId === 'listanegra') {
+        loadBlacklistVisitors();
+    }
+    else if (screenId === 'usuarios') {
+        loadUsers();
+    }
+    else if (screenId === 'atendimento') {
+        loadHikvisionConfig();
+    }
+    else if (screenId === 'config') {
+        loadCustomizationForm();
+    }
+        else if (screenId === 'unidades') {
+        displayUnidades();
+    }
+    else if (screenId === 'residentes') {
+        loadResidentsForManagement();
+    }
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
         function showScreenWithAuth(screenId) {
             document.getElementById('configPasswordModal').classList.add('active');
@@ -2303,115 +2516,438 @@ console.log('✅ Cloudinary configurado:', CLOUDINARY_CONFIG.cloudName);
         }
 
         async function importResidentesCSV(file) {
-            if (!file) return;
+    if (!file) return;
 
-            console.log('📥 Iniciando importação de moradores...');
-            showLoading('Lendo CSV...');
+    console.log('📥 Iniciando importação de moradores...');
+    showLoading('Lendo CSV...');
 
-            Papa.parse(file, {
-                header: true,
-                skipEmptyLines: true,
-                encoding: 'UTF-8',
-                complete: async function(results) {
-                    const data = results.data;
-                    
-                    if (data.length === 0) {
-                        hideLoading();
-                        alert('❌ Arquivo CSV vazio!');
-                        return;
+    // LER O ARQUIVO PRIMEIRO PARA DETECTAR O SEPARADOR
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+        const csvText = e.target.result;
+        
+        // DETECTAR SEPARADOR
+        const firstLine = csvText.split('\n')[0];
+        const usaSemicolon = firstLine.includes(';');
+        const delimiter = usaSemicolon ? ';' : ',';
+        
+        console.log(`🔍 Separador detectado: "${delimiter}" (${usaSemicolon ? 'ponto e vírgula' : 'vírgula'})`);
+        console.log('📄 Primeira linha:', firstLine);
+
+        Papa.parse(csvText, {
+            header: true,
+            skipEmptyLines: true,
+            encoding: 'UTF-8',
+            delimiter: delimiter, // USAR O SEPARADOR DETECTADO
+            complete: async function(results) {
+                const data = results.data;
+                
+                if (data.length === 0) {
+                    hideLoading();
+                    alert('❌ Arquivo CSV vazio ou formato incorreto!');
+                    return;
+                }
+
+                console.log(`📊 ${data.length} linhas encontradas`);
+                console.log('📋 Colunas detectadas:', Object.keys(data[0]));
+                console.log('📄 Primeira linha de dados:', data[0]);
+                
+                // ========== NORMALIZAR NOMES DE COLUNAS ==========
+                const normalizedData = data.map(row => {
+                    const normalized = {};
+                    Object.keys(row).forEach(key => {
+                        const normalizedKey = key.toLowerCase().trim()
+                            .normalize('NFD').replace(/[\u0300-\u036f]/g, ''); // Remove acentos
+                        normalized[normalizedKey] = (row[key] || '').toString().trim();
+                    });
+                    return normalized;
+                });
+                
+                console.log('📋 Primeira linha normalizada:', normalizedData[0]);
+                
+                // ========== ETAPA 1: CRIAR UNIDADES ==========
+                showLoading('Extraindo endereços únicos...');
+                
+                const enderecosUnicos = new Set();
+                
+                normalizedData.forEach((row, index) => {
+                    const endereco = row.endereco || row.endereço || row.unidade || '';
+                    if (endereco && endereco.trim()) {
+                        enderecosUnicos.add(endereco.trim());
                     }
-
-                    showLoading(`Importando ${data.length} moradores...`);
-
-                    let importados = 0;
-                    let erros = 0;
-
-                    for (let i = 0; i < data.length; i++) {
-                        const row = data[i];
-                        
-                        const valores = Object.values(row).filter(v => v && v.trim && v.trim() !== '');
-                        
-                        if (valores.length === 0) {
-                            erros++;
-                            continue;
-                        }
-                        
-                        const endereco = valores[0];
-                        
-                        let nome = 'Morador';
-                        const match = endereco.match(/[-]\s*(.+?),/);
-                        if (match) {
-                            nome = match[1].trim();
-                        } else if (endereco.includes(',')) {
-                            nome = endereco.split(',')[0].trim();
-                        }
-
+                });
+                
+                console.log(`🏢 ${enderecosUnicos.size} endereços únicos:`, Array.from(enderecosUnicos));
+                
+                if (enderecosUnicos.size === 0) {
+                    hideLoading();
+                    alert('❌ ERRO: Nenhum endereço encontrado!\n\nVerifique se existe uma coluna chamada "endereco" ou "endereço".\n\nColunas encontradas: ' + Object.keys(data[0]).join(', '));
+                    return;
+                }
+                
+                // Recarregar unidades existentes
+                await loadUnidades();
+                
+                showLoading('Criando unidades...');
+                
+                let unidadesCriadas = 0;
+                let unidadesExistentes = 0;
+                const mapaUnidades = {}; // { endereco: unidadeId }
+                
+                let contadorUnidade = 0;
+                for (const endereco of enderecosUnicos) {
+                    contadorUnidade++;
+                    updateLoadingProgress(`Unidade ${contadorUnidade}/${enderecosUnicos.size}: ${endereco.substring(0, 30)}...`);
+                    
+                    // Verificar se já existe
+                    let unidadeExistente = unidadesData.find(u => 
+                        u.endereco.toLowerCase().trim() === endereco.toLowerCase().trim()
+                    );
+                    
+                    if (unidadeExistente) {
+                        mapaUnidades[endereco] = unidadeExistente.id;
+                        unidadesExistentes++;
+                        console.log(`✓ Unidade existente: ${endereco}`);
+                    } else {
+                        // Criar nova
                         try {
-                            await db.collection('residentes').add({
-                                nome: nome,
+                            const novaUnidadeRef = await db.collection('unidades').add({
                                 endereco: endereco,
-                                telefone: valores[1] || '',
-                                email: valores[2] || '',
-                                cpf: valores[3] || '',
+                                observacao: 'Criada via importação CSV',
                                 criadoEm: firebase.firestore.FieldValue.serverTimestamp()
                             });
-                            importados++;
-                            updateLoadingProgress(`${importados}/${data.length}`);
+                            
+                            mapaUnidades[endereco] = novaUnidadeRef.id;
+                            unidadesData.push({
+                                id: novaUnidadeRef.id,
+                                endereco: endereco
+                            });
+                            
+                            unidadesCriadas++;
+                            console.log(`✅ Unidade criada: ${endereco} (ID: ${novaUnidadeRef.id})`);
                         } catch (error) {
-                            erros++;
-                            console.error(`❌ Linha ${i+2}:`, error);
+                            console.error(`❌ Erro ao criar unidade "${endereco}":`, error);
                         }
                     }
-
-                    hideLoading();
-                    alert(`✅ Importação concluída!\n\n📊 ${importados} moradores importados${erros > 0 ? `\n⚠️ ${erros} erros` : ''}`);
-                    await loadResidents();
-                },
-                error: function(error) {
-                    hideLoading();
-                    alert('❌ Erro ao ler CSV:\n' + error.message);
                 }
-            });
-        }
+                
+                console.log(`📊 Unidades: ${unidadesCriadas} criadas, ${unidadesExistentes} existentes`);
+
+                // ========== ETAPA 2: IMPORTAR RESIDENTES ==========
+                showLoading(`Importando residentes...`);
+
+                let importados = 0;
+                let erros = 0;
+                const errosDetalhados = [];
+
+                for (let i = 0; i < normalizedData.length; i++) {
+                    const row = normalizedData[i];
+                    const linhaCSV = i + 2;
+                    
+                    updateLoadingProgress(`Residente ${i + 1}/${normalizedData.length}`);
+                    
+                    const enderecoCSV = row.endereco || row.endereço || row.unidade || '';
+                    
+                    if (!enderecoCSV || !enderecoCSV.trim()) {
+                        erros++;
+                        errosDetalhados.push(`Linha ${linhaCSV}: Sem endereço`);
+                        console.warn(`⚠️ Linha ${linhaCSV}: Sem endereço`, row);
+                        continue;
+                    }
+                    
+                    const unidadeId = mapaUnidades[enderecoCSV.trim()];
+                    
+                    if (!unidadeId) {
+                        erros++;
+                        errosDetalhados.push(`Linha ${linhaCSV}: Unidade "${enderecoCSV}" não mapeada`);
+                        console.warn(`⚠️ Linha ${linhaCSV}: Unidade não encontrada`, enderecoCSV);
+                        continue;
+                    }
+
+                    try {
+                        const residenteData = {
+                            unidadeId: unidadeId,
+                            endereco: enderecoCSV.trim(),
+                            nome: row.nome || '',
+                            cpf: row.cpf || '',
+                            telefone: row.telefone || '',
+                            email: row.email || '',
+                            fotoUrl: row.foto || row.fotourl || '',
+                            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        
+                        await db.collection('residentes').add(residenteData);
+                        
+                        importados++;
+                        console.log(`✅ Residente importado: ${residenteData.nome || 'Sem nome'} - ${enderecoCSV}`);
+                        
+                    } catch (error) {
+                        erros++;
+                        errosDetalhados.push(`Linha ${linhaCSV}: ${error.message}`);
+                        console.error(`❌ Linha ${linhaCSV}:`, error);
+                    }
+                }
+
+                hideLoading();
+                
+                // RESULTADO
+                let mensagem = `✅ IMPORTAÇÃO CONCLUÍDA!\n\n`;
+                mensagem += `🏢 UNIDADES:\n`;
+                mensagem += `   • ${unidadesCriadas} criadas\n`;
+                mensagem += `   • ${unidadesExistentes} já existiam\n`;
+                mensagem += `   • Total: ${enderecosUnicos.size}\n\n`;
+                mensagem += `👥 RESIDENTES:\n`;
+                mensagem += `   • ${importados} importados com sucesso\n`;
+                
+                if (erros > 0) {
+                    mensagem += `   • ${erros} erros encontrados\n\n`;
+                    mensagem += `⚠️ ERROS:\n`;
+                    mensagem += errosDetalhados.slice(0, 10).join('\n');
+                    if (errosDetalhados.length > 10) {
+                        mensagem += `\n... e mais ${errosDetalhados.length - 10} erros`;
+                    }
+                }
+                
+                alert(mensagem);
+                
+                console.log('📊 RESUMO FINAL:', {
+                    unidadesCriadas,
+                    unidadesExistentes,
+                    residentesImportados: importados,
+                    erros,
+                    totalLinhasCSV: data.length
+                });
+                
+                // RECARREGAR
+                await loadUnidades();
+                await loadResidents();
+                await loadResidentsForManagement();
+            },
+            error: function(error) {
+                hideLoading();
+                alert('❌ Erro ao processar CSV:\n\n' + error.message);
+                console.error('Erro PapaParse:', error);
+            }
+        });
+    };
+    
+    reader.onerror = function() {
+        hideLoading();
+        alert('❌ Erro ao ler o arquivo!');
+    };
+    
+    reader.readAsText(file, 'UTF-8');
+}
 
         // ========== INICIALIZAÇÃO ==========
         window.addEventListener('DOMContentLoaded', function() {
-            applyCustomization();
+    applyCustomization();
+    setupCPFMask();
+    
+    // Atualizar preview de cor
+    document.getElementById('systemColor').addEventListener('input', function(e) {
+        document.getElementById('colorPreview').style.background = e.target.value;
+    });
+    
+    // VERIFICAR SESSÃO SALVA
+    const savedUser = sessionStorage.getItem('zecure_user');
+    if (savedUser) {
+        try {
+            currentUser = JSON.parse(savedUser);
+            currentOperator = currentUser.nome;
+            userPermissions = currentUser.permissoes || [];
             
-            // Atualizar preview de cor em tempo real
-            document.getElementById('systemColor').addEventListener('input', function(e) {
-                document.getElementById('colorPreview').style.background = e.target.value;
-            });
-            
-            const savedOperator = sessionStorage.getItem('zecure_operator');
-            if (savedOperator) {
-                document.getElementById('operatorName').value = savedOperator;
-                loginOperator();
-            }
-        });
-
-        // ========== LOGIN OPERADOR ==========
-        function loginOperator() {
-            const operatorName = document.getElementById('operatorName').value.trim();
-            
-            if (!operatorName || operatorName.length < 3) {
-                alert('⚠️ Digite um nome válido (mínimo 3 caracteres)!');
-                return;
-            }
-            
-            currentOperator = operatorName;
-            sessionStorage.setItem('zecure_operator', operatorName);
-            
+            // Auto-login
             document.getElementById('operatorLoginScreen').style.display = 'none';
             document.getElementById('mainSystem').style.display = 'block';
-            document.getElementById('operatorNameDisplay').textContent = operatorName;
-            document.getElementById('configOperatorName').textContent = operatorName;
+            document.getElementById('operatorNameDisplay').textContent = currentUser.nome;
+            document.getElementById('configOperatorName').textContent = currentUser.nome;
             
-            applyCustomization();
-            setupCPFMask();
             loadData();
             updateDashboardBadges();
+            applyPermissions();
+            
+        } catch (error) {
+            console.error('Erro ao restaurar sessão:', error);
+            sessionStorage.removeItem('zecure_user');
         }
+    }
+    
+    // Enter no password = submit
+    document.getElementById('loginPassword').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            authenticateUser();
+        }
+    });
+    
+    // Config password modal
+    const configPasswordInput = document.getElementById('configPasswordInput');
+    if (configPasswordInput) {
+        configPasswordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') verifyConfigPassword();
+        });
+    }
+});
+
+        // ========== LOGIN OPERADOR ==========
+        // ========== LOGIN COM AUTENTICAÇÃO ==========
+let currentUser = null;
+let userPermissions = [];
+
+async function authenticateUser() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errorDiv = document.getElementById('loginError');
+    
+    if (!email || !password) {
+        showLoginError('⚠️ Preencha email e senha!');
+        return;
+    }
+    
+    showLoading('Autenticando...');
+    
+    try {
+        // Buscar usuário no Firebase
+        const snapshot = await db.collection('usuarios')
+            .where('email', '==', email)
+            .where('senha', '==', password)
+            .limit(1)
+            .get();
+        
+        if (snapshot.empty) {
+            hideLoading();
+            showLoginError('❌ Email ou senha incorretos!');
+            return;
+        }
+        
+        // Usuário encontrado
+        const userDoc = snapshot.docs[0];
+        currentUser = {
+            id: userDoc.id,
+            ...userDoc.data()
+        };
+        
+        currentOperator = currentUser.nome;
+        userPermissions = currentUser.permissoes || [];
+        
+        // Salvar sessão
+        sessionStorage.setItem('zecure_user', JSON.stringify(currentUser));
+        
+        hideLoading();
+        
+        // Entrar no sistema
+        document.getElementById('operatorLoginScreen').style.display = 'none';
+        document.getElementById('mainSystem').style.display = 'block';
+        document.getElementById('operatorNameDisplay').textContent = currentUser.nome;
+        document.getElementById('configOperatorName').textContent = currentUser.nome;
+        
+        applyCustomization();
+        setupCPFMask();
+        loadData();
+        updateDashboardBadges();
+        applyPermissions();
+        
+        console.log('✅ Login realizado:', currentUser.nome);
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Erro no login:', error);
+        showLoginError('❌ Erro ao conectar ao servidor. Tente novamente.');
+    }
+}
+
+function showLoginError(message) {
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+// ========== APLICAR PERMISSÕES ==========
+// ========== APLICAR PERMISSÕES ==========
+function applyPermissions() {
+    // Se for admin ou tem permissão de config, libera tudo
+    if (userPermissions.length === 0 || userPermissions.includes('config')) {
+        return;
+    }
+    
+    // Mapear cards do dashboard com suas permissões
+    const moduleCards = {
+        'cadastro': 'entrada',
+        'monitoramento': 'ativos',
+        'saida': 'saida',
+        'relatorio': 'relatorios',
+        'listanegra': 'listanegra',
+        'unidades': 'unidades',      // NOVO
+        'residentes': 'residentes',  // NOVO
+        'usuarios': 'usuarios',
+        'atendimento': 'atendimento',
+        'config': 'config'
+    };
+    
+    // Ocultar cards sem permissão
+    Object.keys(moduleCards).forEach(screen => {
+        const permission = moduleCards[screen];
+        const card = document.querySelector(`.dashboard-card[onclick="showScreen('${screen}')"]`) ||
+                     document.querySelector(`.dashboard-card[onclick="showScreenWithAuth('${screen}')"]`);
+        
+        if (card && !userPermissions.includes(permission)) {
+            card.style.display = 'none';
+        }
+    });
+}
+// ========== VERIFICAR PERMISSÃO ANTES DE MOSTRAR TELA ==========
+// ========== VERIFICAR PERMISSÃO ANTES DE MOSTRAR TELA ==========
+function hasPermission(screen) {
+    const modulePermissions = {
+        'cadastro': 'entrada',
+        'monitoramento': 'ativos',
+        'saida': 'saida',
+        'relatorio': 'relatorios',
+        'listanegra': 'listanegra',
+        'unidades': 'unidades',      // NOVO
+        'residentes': 'residentes',  // NOVO
+        'usuarios': 'usuarios',
+        'atendimento': 'atendimento',
+        'config': 'config'
+    };
+    
+    const requiredPermission = modulePermissions[screen];
+    
+    // Admin (com permissão config) tem acesso total
+    if (!requiredPermission || userPermissions.includes('config')) {
+        return true;
+    }
+    
+    return userPermissions.includes(requiredPermission);
+}
+
+// ========== LOGOUT ==========
+function logout() {
+    if (!confirm('Deseja sair do sistema?')) {
+        return;
+    }
+    
+    sessionStorage.removeItem('zecure_user');
+    currentUser = null;
+    currentOperator = null;
+    userPermissions = [];
+    
+    location.reload();
+}
+
+// ========== MANTER loginOperator() PARA COMPATIBILIDADE ==========
+function loginOperator() {
+    // Redirecionar para autenticação moderna
+    authenticateUser();
+}
+
+function changeOperator() {
+    logout();
+}
 
         function changeOperator() {
             if (confirm('Deseja trocar de operador? O sistema será reiniciado.')) {
@@ -2422,41 +2958,54 @@ console.log('✅ Cloudinary configurado:', CLOUDINARY_CONFIG.cloudName);
 
         // ========== CARREGAMENTO DE DADOS ==========
         async function loadData() {
-            try {
-                console.log('🔄 Carregando dados...');
-                
-                await Promise.all([
-                    loadResidents(),
-                    loadVisitors(),
-                    loadUsers()
-                ]);
-                
-                console.log('✅ Dados carregados!');
-                updateDashboardBadges();
-            } catch (error) {
-                console.error('❌ Erro ao carregar dados:', error);
-                alert('⚠️ Erro ao conectar ao Firebase. Verifique sua conexão.');
-            }
-        }
+    try {
+        console.log('🔄 Carregando dados...');
+        
+        await Promise.all([
+            loadUnidades(),      // NOVO
+            loadResidents(),
+            loadVisitors(),
+            loadUsers()
+        ]);
+        
+        console.log('✅ Dados carregados!');
+        updateDashboardBadges();
+    } catch (error) {
+        console.error('❌ Erro ao carregar dados:', error);
+        alert('⚠️ Erro ao conectar ao Firebase. Verifique sua conexão.');
+    }
+}
 
         async function loadResidents() {
-            try {
-                const snapshot = await db.collection('residentes')
-                    .limit(1000)
-                    .get();
-                
-                residentsData = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                
-                residentsData.sort((a, b) => a.nome.localeCompare(b.nome));
-                
-                console.log(`✅ ${residentsData.length} residentes carregados`);
-            } catch (error) {
-                console.error('Erro ao carregar residentes:', error);
-            }
+    try {
+        showLoading('Carregando residentes...');
+        
+        const snapshot = await db.collection('residentes')
+            .orderBy('nome', 'asc')
+            .get();
+
+        residentsData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        console.log(`✅ ${residentsData.length} residentes carregados`);
+        
+        // Log para debug: listar alguns nomes
+        if (residentsData.length > 0) {
+            console.log("📋 Primeiros 10 residentes:", residentsData.slice(0, 10).map(r => r.nome));
         }
+        
+        hideLoading();
+
+        return residentsData;
+    } catch (error) {
+        hideLoading();
+        console.error('❌ Erro ao carregar residentes:', error);
+        showAlert('Erro ao carregar residentes: ' + error.message, 'danger');
+        return [];
+    }
+}
 
         async function loadVisitors() {
             try {
@@ -2659,7 +3208,578 @@ console.log('✅ Cloudinary configurado:', CLOUDINARY_CONFIG.cloudName);
                 preview.style.display = 'block';
             }
         }
+         
+        // ========== UNIDADES (NOVO) ==========
+async function loadUnidades() {
+    try {
+        const snapshot = await db.collection('unidades')
+            .orderBy('endereco')
+            .get();
+        
+        unidadesData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        console.log(`✅ ${unidadesData.length} unidades carregadas`);
+        updateUnidadeSelect();
+    } catch (error) {
+        console.error('Erro ao carregar unidades:', error);
+    }
+}
 
+function updateUnidadeSelect() {
+    const select = document.getElementById('residentUnidade');
+    if (!select) return;
+    
+    select.innerHTML = '<option value="">Selecione a unidade</option>' +
+        unidadesData.map(u => `<option value="${u.id}">${u.endereco}</option>`).join('');
+}
+
+function openAddUnidadeModal() {
+    document.getElementById('addUnidadeModal').classList.add('active');
+    document.getElementById('addUnidadeForm').reset();
+    document.getElementById('unidadeModalTitle').textContent = '➕ Adicionar Unidade';
+    document.getElementById('addUnidadeForm').dataset.unidadeId = '';
+}
+
+function closeAddUnidadeModal() {
+    document.getElementById('addUnidadeModal').classList.remove('active');
+}
+
+async function saveUnidade(event) {
+    event.preventDefault();
+    
+    const endereco = document.getElementById('unidadeEndereco').value.trim();
+    const observacao = document.getElementById('unidadeObservacao').value.trim();
+    
+    if (!endereco) {
+        alert('⚠️ Endereço é obrigatório!');
+        return;
+    }
+    
+    try {
+        showLoading('Salvando unidade...');
+        
+        const unidadeData = {
+            endereco,
+            observacao,
+            atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const unidadeId = document.getElementById('addUnidadeForm').dataset.unidadeId;
+        
+        if (unidadeId) {
+            await db.collection('unidades').doc(unidadeId).update(unidadeData);
+            alert('✅ Unidade atualizada!');
+        } else {
+            unidadeData.criadoEm = firebase.firestore.FieldValue.serverTimestamp();
+            await db.collection('unidades').add(unidadeData);
+            alert('✅ Unidade cadastrada!');
+        }
+        
+        hideLoading();
+        closeAddUnidadeModal();
+        await loadUnidades();
+        displayUnidades();
+        
+    } catch (error) {
+        hideLoading();
+        alert('❌ Erro: ' + error.message);
+    }
+}
+
+async function displayUnidades() {
+    const list = document.getElementById('unidadesList');
+    if (!list) return;
+    
+    if (unidadesData.length === 0) {
+        list.innerHTML = `<div class="empty-state">
+            <div class="icon">🏢</div>
+            <h3>Nenhuma unidade</h3>
+            <p>Adicione a primeira unidade</p>
+        </div>`;
+        return;
+    }
+    
+    list.innerHTML = unidadesData.map(u => `
+        <div class="visitor-card">
+            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--info), var(--primary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 2em; flex-shrink: 0;">
+                🏢
+            </div>
+            <div class="visitor-info" style="flex: 1;">
+                <div class="visitor-name">${u.endereco}</div>
+                ${u.observacao ? `<div class="visitor-detail">📝 ${u.observacao}</div>` : ''}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn btn-info btn-sm" onclick='editUnidade(${JSON.stringify(u).replace(/'/g, "&#39;")})'>✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUnidade('${u.id}', '${u.endereco.replace(/'/g, "\'")}')">🗑️ Excluir</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function editUnidade(unidade) {
+    document.getElementById('addUnidadeModal').classList.add('active');
+    document.getElementById('unidadeModalTitle').textContent = '✏️ Editar Unidade';
+    document.getElementById('unidadeEndereco').value = unidade.endereco || '';
+    document.getElementById('unidadeObservacao').value = unidade.observacao || '';
+    document.getElementById('addUnidadeForm').dataset.unidadeId = unidade.id;
+}
+
+async function deleteUnidade(unidadeId, endereco) {
+    if (!confirm(`Excluir unidade "${endereco}"?\n\n⚠️ Todos os residentes vinculados perderão a referência!`)) {
+        return;
+    }
+    
+    try {
+        showLoading('Excluindo...');
+        await db.collection('unidades').doc(unidadeId).delete();
+        hideLoading();
+        alert('✅ Unidade excluída!');
+        await loadUnidades();
+        displayUnidades();
+    } catch (error) {
+        hideLoading();
+        alert('❌ Erro: ' + error.message);
+    }
+}
+
+function searchUnidadesForManagement(query) {
+    if (!query || query.length < 2) {
+        displayUnidades();
+        return;
+    }
+    
+    const normalizeString = (str) => {
+        if (!str) return '';
+        return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    };
+    
+    const queryNorm = normalizeString(query);
+    const filtered = unidadesData.filter(u => normalizeString(u.endereco || '').includes(queryNorm));
+    
+    const list = document.getElementById('unidadesList');
+    if (!list) return;
+    
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state">
+            <div class="icon">🔍</div>
+            <h3>Nenhuma unidade encontrada</h3>
+        </div>`;
+        return;
+    }
+    
+    list.innerHTML = filtered.map(u => `
+        <div class="visitor-card">
+            <div style="width: 60px; height: 60px; background: linear-gradient(135deg, var(--info), var(--primary)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 2em; flex-shrink: 0;">
+                🏢
+            </div>
+            <div class="visitor-info" style="flex: 1;">
+                <div class="visitor-name">${u.endereco}</div>
+                ${u.observacao ? `<div class="visitor-detail">📝 ${u.observacao}</div>` : ''}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn btn-info btn-sm" onclick='editUnidade(${JSON.stringify(u).replace(/'/g, "&#39;")})'>✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUnidade('${u.id}', '${u.endereco.replace(/'/g, "\'")}')">🗑️ Excluir</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ========== RESIDENTES (NOVO) ==========
+async function loadResidentsForManagement() {
+    try {
+        showLoading('Carregando residentes...');
+        await loadResidents();
+        await loadUnidades();
+        hideLoading();
+        displayResidentsForManagement(residentsData);
+    } catch (error) {
+        hideLoading();
+        console.error('Erro:', error);
+    }
+}
+
+function displayResidentsForManagement(residents) {
+    const list = document.getElementById('residentsList');
+    if (!list) return;
+    
+    if (!residents || residents.length === 0) {
+        list.innerHTML = `<div class="empty-state">
+            <div class="icon">🏠</div>
+            <h3>Nenhum residente cadastrado</h3>
+            <p>Clique em "Adicionar Residente"</p>
+        </div>`;
+        return;
+    }
+    
+    list.innerHTML = residents.map(r => {
+        const unidade = unidadesData.find(u => u.id === r.unidadeId);
+        const unidadeNome = unidade ? unidade.endereco : r.endereco || 'Sem unidade';
+        
+        return `<div class="visitor-card">
+            <img src="${r.fotoUrl || 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'60\' height=\'60\'%3E%3Crect fill=\'%23ddd\' width=\'60\' height=\'60\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%23999\' font-size=\'24\'%3E👤%3C/text%3E%3C/svg%3E'}" class="visitor-photo">
+            <div class="visitor-info" style="flex: 1;">
+                <div class="visitor-name">${r.nome || 'Sem nome'}</div>
+                <div class="visitor-detail">🏠 ${unidadeNome}</div>
+                ${r.cpf ? `<div class="visitor-detail">📄 ${r.cpf}</div>` : ''}
+                ${r.telefone ? `<div class="visitor-detail">📞 ${r.telefone}</div>` : ''}
+                ${r.email ? `<div class="visitor-detail">📧 ${r.email}</div>` : ''}
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                ${r.telefone ? `<button class="btn btn-success btn-sm" onclick="window.location.href='tel:${r.telefone}'">📞 Ligar</button>` : ''}
+                <button class="btn btn-info btn-sm" onclick='editResident(${JSON.stringify(r).replace(/'/g, "&#39;")})'>✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteResident('${r.id}', '${(r.nome || 'residente').replace(/'/g, "\'")}')">🗑️ Excluir</button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function searchResidentsForManagement(query) {
+    if (!query || query.length < 2) {
+        displayResidentsForManagement(residentsData);
+        return;
+    }
+    
+    const normalizeString = (str) => {
+        if (!str) return '';
+        return str.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    };
+    
+    const queryNorm = normalizeString(query);
+    
+    const filtered = residentsData.filter(r => {
+        const nomeNorm = normalizeString(r.nome || '');
+        const cpfNorm = normalizeString(r.cpf || '');
+        const telefoneNorm = normalizeString(r.telefone || '');
+        
+        return nomeNorm.includes(queryNorm) || cpfNorm.includes(queryNorm) || telefoneNorm.includes(queryNorm);
+    });
+    
+    displayResidentsForManagement(filtered);
+}
+
+function openAddResidentModal() {
+    document.getElementById('addResidentModal').classList.add('active');
+    document.getElementById('addResidentForm').reset();
+    document.getElementById('residentModalTitle').textContent = '➕ Adicionar Residente';
+    
+    currentResidentId = null;
+    residentCapturedPhoto = null;
+    
+    document.getElementById('residentCameraContainer').style.display = 'none';
+    document.getElementById('residentPhotoContainer').style.display = 'none';
+    document.getElementById('openResidentCameraBtn').style.display = 'block';
+    document.getElementById('changeResidentPhotoBtn').style.display = 'none';
+    
+    updateUnidadeSelect();
+}
+
+function closeAddResidentModal() {
+    document.getElementById('addResidentModal').classList.remove('active');
+    
+    if (residentVideoStream) {
+        residentVideoStream.getTracks().forEach(track => track.stop());
+        residentVideoStream = null;
+    }
+}
+
+async function saveResident(event) {
+    event.preventDefault();
+    
+    const unidadeId = document.getElementById('residentUnidade').value;
+    const nome = document.getElementById('residentName').value.trim();
+    const cpf = document.getElementById('residentCPF').value.trim();
+    const telefone = document.getElementById('residentPhone').value.trim();
+    const email = document.getElementById('residentEmail').value.trim();
+    
+    if (!unidadeId) {
+        alert('⚠️ Selecione uma unidade!');
+        return;
+    }
+    
+    if (cpf) {
+        const cpfLimpo = cpf.replace(/[^\d]/g, '');
+        if (cpfLimpo.length === 11 && !validarCPF(cpf)) {
+            alert('❌ CPF inválido!');
+            return;
+        }
+    }
+    
+    try {
+        showLoading('Salvando residente...');
+        
+        let fotoUrl = residentCapturedPhoto || '';
+        
+        if (residentCapturedPhoto && residentCapturedPhoto.startsWith('data:')) {
+            showLoading('Enviando foto...');
+            fotoUrl = await uploadPhotoToCloudinary(residentCapturedPhoto);
+        }
+        
+        const unidade = unidadesData.find(u => u.id === unidadeId);
+        const endereco = unidade ? unidade.endereco : '';
+        
+        const residentData = {
+            unidadeId,
+            endereco,
+            nome,
+            cpf,
+            telefone,
+            email,
+            fotoUrl,
+            atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        if (currentResidentId) {
+            await db.collection('residentes').doc(currentResidentId).update(residentData);
+            alert('✅ Residente atualizado!');
+        } else {
+            residentData.criadoEm = firebase.firestore.FieldValue.serverTimestamp();
+            await db.collection('residentes').add(residentData);
+            alert('✅ Residente cadastrado!');
+        }
+        
+        hideLoading();
+        closeAddResidentModal();
+        
+        await loadResidents();
+        await loadResidentsForManagement();
+        
+    } catch (error) {
+        hideLoading();
+        console.error('Erro:', error);
+        alert('❌ Erro: ' + error.message);
+    }
+}
+
+function editResident(resident) {
+    document.getElementById('addResidentModal').classList.add('active');
+    document.getElementById('residentModalTitle').textContent = '✏️ Editar Residente';
+    
+    currentResidentId = resident.id;
+    
+    updateUnidadeSelect();
+    document.getElementById('residentUnidade').value = resident.unidadeId || '';
+    document.getElementById('residentName').value = resident.nome || '';
+    document.getElementById('residentCPF').value = resident.cpf || '';
+    document.getElementById('residentPhone').value = resident.telefone || '';
+    document.getElementById('residentEmail').value = resident.email || '';
+    
+    if (resident.fotoUrl) {
+        residentCapturedPhoto = resident.fotoUrl;
+        document.getElementById('residentLoadedPhoto').src = resident.fotoUrl;
+        document.getElementById('residentPhotoContainer').style.display = 'block';
+        document.getElementById('openResidentCameraBtn').style.display = 'none';
+        document.getElementById('changeResidentPhotoBtn').style.display = 'block';
+    }
+}
+
+async function deleteResident(residentId, residentName) {
+    if (!confirm(`Excluir residente "${residentName}"?\n\nEsta ação não pode ser desfeita.`)) {
+        return;
+    }
+    
+    try {
+        showLoading('Excluindo...');
+        await db.collection('residentes').doc(residentId).delete();
+        hideLoading();
+        alert('✅ Residente excluído!');
+        
+        await loadResidents();
+        await loadResidentsForManagement();
+    } catch (error) {
+        hideLoading();
+        alert('❌ Erro: ' + error.message);
+    }
+}
+
+// ========== CÂMERA DE RESIDENTES ==========
+async function openResidentCamera() {
+    try {
+        document.getElementById('residentCameraContainer').style.display = 'block';
+        document.getElementById('residentCameraControls').style.display = 'grid';
+        document.getElementById('openResidentCameraBtn').style.display = 'none';
+        
+        const video = document.getElementById('residentVideo');
+        if (residentVideoStream) {
+            residentVideoStream.getTracks().forEach(track => track.stop());
+        }
+        
+        residentVideoStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: residentFacingMode,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
+            } 
+        });
+        
+        video.srcObject = residentVideoStream;
+        video.style.display = 'block';
+        document.getElementById('residentPhotoPreview').style.display = 'none';
+        
+    } catch (error) {
+        console.error('Erro ao abrir câmera:', error);
+        alert('⚠️ Erro ao acessar câmera');
+    }
+}
+
+async function flipResidentCamera() {
+    residentFacingMode = residentFacingMode === 'user' ? 'environment' : 'user';
+    await openResidentCamera();
+}
+
+function takeResidentPhoto() {
+    const video = document.getElementById('residentVideo');
+    const canvas = document.getElementById('residentCanvas');
+    const preview = document.getElementById('residentPhotoPreview');
+    
+    canvas.width = 640;
+    canvas.height = 480;
+    
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, 640, 480);
+    
+    residentCapturedPhoto = canvas.toDataURL('image/jpeg', 0.8);
+    
+    preview.src = residentCapturedPhoto;
+    preview.style.display = 'block';
+    video.style.display = 'none';
+    
+    if (residentVideoStream) {
+        residentVideoStream.getTracks().forEach(track => track.stop());
+        residentVideoStream = null;
+    }
+    
+    document.getElementById('changeResidentPhotoBtn').style.display = 'block';
+    document.getElementById('residentCameraControls').style.display = 'none';
+}
+
+function resetResidentPhoto() {
+    document.getElementById('residentPhotoPreview').style.display = 'none';
+    document.getElementById('residentVideo').style.display = 'block';
+    residentCapturedPhoto = null;
+    openResidentCamera();
+}
+
+function changeResidentPhoto() {
+    residentCapturedPhoto = null;
+    document.getElementById('residentPhotoPreview').style.display = 'none';
+    document.getElementById('residentPhotoContainer').style.display = 'none';
+    document.getElementById('changeResidentPhotoBtn').style.display = 'none';
+    document.getElementById('residentCameraContainer').style.display = 'none';
+    document.getElementById('openResidentCameraBtn').style.display = 'block';
+}
+
+// ========== EXPORTAR RESIDENTES ==========
+function downloadResidentsPDF() {
+    if (!residentsData || residentsData.length === 0) {
+        alert('⚠️ Nenhum residente para exportar!');
+        return;
+    }
+
+    showLoading('Gerando PDF...');
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('l', 'mm', 'a4');
+
+        const systemName = customization.systemName || 'ZECURE';
+
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.text(`${systemName} - Residentes`, 14, 15);
+        
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'normal');
+        doc.text('Gerado em: ' + new Date().toLocaleString('pt-BR'), 14, 22);
+        
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(`Total: ${residentsData.length}`, 14, 28);
+
+        const tableData = residentsData.map(r => {
+            const unidade = unidadesData.find(u => u.id === r.unidadeId);
+            const unidadeNome = unidade ? unidade.endereco : r.endereco || '-';
+            
+            return [
+                r.nome || '-',
+                unidadeNome,
+                r.telefone || '-',
+                r.email || '-',
+                r.cpf || '-'
+            ];
+        });
+
+        doc.autoTable({
+            head: [['Nome', 'Unidade', 'Telefone', 'Email', 'CPF']],
+            body: tableData,
+            startY: 33,
+            styles: { fontSize: 8, cellPadding: 2 },
+            headStyles: { fillColor: [76, 119, 153] }
+        });
+
+        doc.save(`residentes-${Date.now()}.pdf`);
+        
+        hideLoading();
+        alert('✅ PDF exportado!');
+        
+    } catch (error) {
+        hideLoading();
+        alert('❌ Erro: ' + error.message);
+    }
+}
+
+function downloadResidentsCSV() {
+    if (!residentsData || residentsData.length === 0) {
+        alert('⚠️ Nenhum residente!');
+        return;
+    }
+
+    try {
+        showLoading('Gerando CSV...');
+        
+        const headers = ['Unidade', 'Nome', 'CPF', 'Telefone', 'Email', 'Foto URL'];
+        
+        const rows = residentsData.map(r => {
+            const unidade = unidadesData.find(u => u.id === r.unidadeId);
+            const unidadeNome = unidade ? unidade.endereco : r.endereco || '';
+            
+            return [
+                unidadeNome,
+                r.nome || '',
+                r.cpf || '',
+                r.telefone || '',
+                r.email || '',
+                r.fotoUrl || ''
+            ];
+        });
+        
+        const csvContent = [
+            headers.join(','),
+            ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n');
+        
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', `residentes-${Date.now()}.csv`);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        hideLoading();
+        alert('✅ CSV exportado!');
+        
+    } catch (error) {
+        hideLoading();
+        alert('❌ Erro: ' + error.message);
+    }
+}
         // ========== GERENCIAMENTO DE USUÁRIOS (NOVO) ==========
         async function loadUsers() {
             try {
@@ -2811,27 +3931,27 @@ console.log('✅ Cloudinary configurado:', CLOUDINARY_CONFIG.cloudName);
         }
 
         function editUser(user) {
-            document.getElementById('addUserModal').classList.add('active');
-            document.getElementById('addUserForm').dataset.userId = user.id;
-            
-            document.getElementById('userName').value = user.nome;
-            document.getElementById('userEmail').value = user.email;
-            document.getElementById('userPassword').value = user.senha;
-            document.getElementById('userRole').value = user.funcao || '';
-            
-            // Desmarcar todas
-            document.querySelectorAll('input[name="permissions"]').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            
-            // Marcar permissões do usuário
-            (user.permissoes || []).forEach(perm => {
-                const checkbox = document.getElementById(`perm_${perm}`);
-                if (checkbox) {
-                    checkbox.checked = true;
-                }
-            });
+    document.getElementById('addUserModal').classList.add('active');
+    document.getElementById('addUserForm').dataset.userId = user.id;
+    
+    document.getElementById('userName').value = user.nome;
+    document.getElementById('userEmail').value = user.email;
+    document.getElementById('userPassword').value = user.senha;
+    document.getElementById('userRole').value = user.funcao || '';
+    
+    // Desmarcar todas
+    document.querySelectorAll('input[name="permissions"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    // Marcar permissões do usuário (incluindo unidades e residentes)
+    (user.permissoes || []).forEach(perm => {
+        const checkbox = document.getElementById(`perm_${perm}`);
+        if (checkbox) {
+            checkbox.checked = true;
         }
+    });
+}
 
         async function deleteUser(userId, userName) {
             if (!confirm(`Excluir usuário "${userName}"?\n\nEsta ação não pode ser desfeita.`)) {
@@ -3287,86 +4407,158 @@ console.log('✅ Cloudinary configurado:', CLOUDINARY_CONFIG.cloudName);
         }
 
         // ========== RESIDENTES (COM DEBOUNCE) ==========
-        async function searchResidents(query) {
-            const list = document.getElementById('autocompleteList');
-            
-            if (!query || query.length < 2) {
-                list.classList.remove('show');
-                return;
+     async function searchResidents(query) {
+    const list = document.getElementById('autocompleteList');
+
+    if (!query || query.trim().length < 1) {
+        list.classList.remove('show');
+        return;
+    }
+
+    clearTimeout(searchResidentsTimer);
+
+    searchResidentsTimer = setTimeout(async () => {
+        console.log(`🔍 Buscando: "${query}"`);
+
+        const normalize = (str) => {
+            if (!str) return "";
+            return str.toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^\w\s]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        };
+
+        // Extrair TODOS os números do endereço, não só o último
+        const extractAllNumbers = (str) => {
+            if (!str) return [];
+            const matches = str.match(/\d+/g);
+            return matches ? matches : [];
+        };
+
+        const qNorm = normalize(query);
+        const qNum = query.replace(/\D/g, ""); // número puro digitado
+
+        const matches = (resident) => {
+            const nome = normalize(resident.nome || "");
+            const endereco = normalize(resident.endereco || "");
+            const enderecoOriginal = resident.endereco || "";
+
+            // 1️⃣ BUSCA POR NOME
+            if (nome.includes(qNorm)) return true;
+
+            // 2️⃣ BUSCA POR TEXTO DO ENDEREÇO
+            if (endereco.includes(qNorm)) return true;
+
+            // 3️⃣ BUSCA POR NÚMERO NO ENDEREÇO (QUALQUER NÚMERO, NÃO SÓ O ÚLTIMO)
+            if (qNum) {
+                const numerosNoEndereco = extractAllNumbers(enderecoOriginal);
+                
+                // Verifica se QUALQUER número do endereço contém o número buscado
+                const encontrouNumero = numerosNoEndereco.some(num => num.includes(qNum));
+                
+                if (encontrouNumero) {
+                    console.log(`✅ Encontrou "${qNum}" em "${enderecoOriginal}"`);
+                    return true;
+                }
             }
 
-            clearTimeout(searchResidentsTimer);
-            
-            searchResidentsTimer = setTimeout(async () => {
-                console.log(`🔍 Buscando morador: "${query}"`);
-                
-                const normalizeString = (str) => {
-                    if (!str) return '';
-                    return str.toLowerCase()
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .trim();
-                };
-                
-                const queryNormalized = normalizeString(query);
-                
-                if (residentsData && residentsData.length > 0) {
-                    const filtered = residentsData.filter(r => {
-                        const nomeNorm = normalizeString(r.nome || '');
-                        const enderecoNorm = normalizeString(r.endereco || '');
-                        
-                        return nomeNorm.includes(queryNormalized) || 
-                               enderecoNorm.includes(queryNormalized);
-                    });
+            // 4️⃣ BUSCA PELA UNIDADE CADASTRADA (se tiver unidadesData)
+            if (typeof unidadesData !== 'undefined' && resident.unidadeId) {
+                const unidade = unidadesData.find(u => u.id === resident.unidadeId);
+                if (unidade) {
+                    const unidadeNorm = normalize(unidade.endereco || "");
+                    if (unidadeNorm.includes(qNorm)) return true;
 
-                    if (filtered.length > 0) {
-                        displayResidentsList(filtered, list);
-                        return;
+                    if (qNum) {
+                        const numerosUnidade = extractAllNumbers(unidade.endereco || "");
+                        if (numerosUnidade.some(num => num.includes(qNum))) return true;
                     }
                 }
+            }
 
-                try {
-                    const snapshot = await db.collection('residentes')
-                        .limit(100)
-                        .get();
-                    
-                    const allResidents = snapshot.docs.map(doc => doc.data());
-                    
-                    const filtered = allResidents.filter(r => {
-                        const nomeNorm = normalizeString(r.nome || '');
-                        const enderecoNorm = normalizeString(r.endereco || '');
-                        
-                        return nomeNorm.includes(queryNormalized) || 
-                               enderecoNorm.includes(queryNormalized);
-                    });
-                    
-                    if (filtered.length > 0) {
-                        displayResidentsList(filtered, list);
-                    } else {
-                        list.innerHTML = `<div class="autocomplete-item" style="color: var(--danger); text-align: center; padding: 16px;">
-                            ❌ Nenhum morador encontrado
-                        </div>`;
-                        list.classList.add('show');
-                    }
-                } catch (error) {
-                    console.error('Erro ao buscar residente:', error);
-                }
-            }, 300);
+            return false;
+        };
+
+        // BUSCAR LOCALMENTE PRIMEIRO
+        let results = [];
+        
+        if (residentsData && residentsData.length > 0) {
+            results = residentsData.filter(r => matches(r));
+            console.log(`📦 Busca local encontrou ${results.length} resultados`);
         }
+
+        // SE NÃO ENCONTROU LOCALMENTE, BUSCAR NO FIREBASE
+        if (results.length === 0) {
+            try {
+                console.log("🔄 Buscando no Firebase...");
+                showLoading('Buscando no banco de dados...');
+
+                const snapshot = await db.collection('residentes')
+                    .limit(500)
+                    .get();
+
+                residentsData = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                console.log(`📊 Total de residentes carregados: ${residentsData.length}`);
+
+                results = residentsData.filter(r => matches(r));
+
+                hideLoading();
+            } catch (error) {
+                hideLoading();
+                console.error("❌ Erro ao buscar no Firebase:", error);
+            }
+        }
+
+        // EXIBIR RESULTADOS
+        if (results.length > 0) {
+            displayResidentsList(results, list);
+        } else {
+            list.innerHTML = `
+                <div class="autocomplete-item" style="padding:12px; text-align:center; color:var(--danger);">
+                    ❌ Nenhum morador encontrado para "${query}"
+                </div>`;
+            list.classList.add("show");
+        }
+
+    }, 200);
+}
 
         function displayResidentsList(filtered, list) {
-            list.innerHTML = filtered.slice(0, 5).map(r => {
-                const nomeEscapado = (r.nome || '').replace(/'/g, "\'");
-                const enderecoEscapado = (r.endereco || '').replace(/'/g, "\'");
-                
-                return `<div class="autocomplete-item" onclick="selectResident('${nomeEscapado}', '${enderecoEscapado}')">
-                    <strong>${r.nome}</strong>
-                    <small>${r.endereco}</small>
-                </div>`;
-            }).join('');
-            
-            list.classList.add('show');
-        }
+    // Ordenar por relevância: primeiro por nome, depois por endereço
+    filtered.sort((a, b) => {
+        const nomeA = (a.nome || '').toLowerCase();
+        const nomeB = (b.nome || '').toLowerCase();
+        return nomeA.localeCompare(nomeB);
+    });
+    
+    list.innerHTML = filtered.slice(0, 8).map(r => {
+        const nomeEscapado = (r.nome || 'Sem nome').replace(/'/g, "\'");
+        const enderecoEscapado = (r.endereco || 'Sem endereço').replace(/'/g, "\'");
+        
+        // Destacar se tem foto
+        const fotoIcon = r.fotoUrl ? '📸' : '👤';
+        
+        return `<div class="autocomplete-item" onclick="selectResident('${nomeEscapado}', '${enderecoEscapado}')">
+            <strong>${fotoIcon} ${r.nome || 'Sem nome'}</strong>
+            <small>🏠 ${r.endereco || 'Sem endereço'}${r.telefone ? ' • 📞 ' + r.telefone : ''}</small>
+        </div>`;
+    }).join('');
+    
+    // Mostrar contador de resultados
+    if (filtered.length > 8) {
+        list.innerHTML += `<div class="autocomplete-item" style="background: var(--gray-light); text-align: center; font-size: 0.75em; color: var(--gray); cursor: default;">
+            + ${filtered.length - 8} resultados não exibidos
+        </div>`;
+    }
+    
+    list.classList.add('show');
+}
 
         function selectResident(nome, endereco) {
             document.getElementById('destination').value = `${nome} - ${endereco}`;
