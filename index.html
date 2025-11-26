@@ -1128,6 +1128,32 @@
             font-weight: 600;
             color: white;
         }
+        /* Botão de Ligar */
+.btn-call {
+    margin-top: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-call:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(17, 153, 142, 0.4);
+}
+
+.btn-call:active {
+    transform: translateY(0);
+}
     </style>
 </head>
 <body>
@@ -1657,7 +1683,7 @@
                         <label>Confirmar Senha</label>
                         <input type="password" id="confirmConfigPassword" placeholder="Confirme a senha">
                     </div>
-                    <button class="btn btn-success" onclick="changeConfigPassword()">🔒 Alterar Senha</button>
+                    <button class="btn btn-success" onclick="changeConfigPasswordGlobal()">🔒 Alterar Senha</button>
                     <p style="font-size: 0.75em; color: var(--gray); margin-top: 10px;">
                         💡 Senha padrão: <strong>admin</strong> (altere para maior segurança)
                     </p>
@@ -1696,7 +1722,7 @@
                         </small>
                     </div>
                     <img id="logoPreviewImg" class="logo-preview" style="display: none;">
-                    <button class="btn btn-success" onclick="saveCustomization()">💾 Salvar Personalização</button>
+                    <button class="btn btn-success" onclick="saveGlobalCustomization()">💾 Salvar Personalização</button>
                     <button class="btn btn-outline" onclick="resetCustomization()">🔄 Restaurar Padrão</button>
                 </div>
 
@@ -3145,7 +3171,7 @@ function changeOperator() {
             }
         }
 
-        function saveCustomization() {
+        function saveGlobalCustomization() {
             const systemName = document.getElementById('systemName').value.trim();
             const systemColor = document.getElementById('systemColor').value;
             const logoUpload = document.getElementById('logoUploadInput');
@@ -4530,40 +4556,44 @@ function downloadResidentsCSV() {
 }
 
         function displayResidentsList(filtered, list) {
-    // Ordenar por relevância: primeiro por nome, depois por endereço
+    // Ordenar por relevância
     filtered.sort((a, b) => {
         const nomeA = (a.nome || '').toLowerCase();
         const nomeB = (b.nome || '').toLowerCase();
         return nomeA.localeCompare(nomeB);
     });
     
-    list.innerHTML = filtered.slice(0, 8).map(r => {
-        const nomeEscapado = (r.nome || 'Sem nome').replace(/'/g, "\'");
-        const enderecoEscapado = (r.endereco || 'Sem endereço').replace(/'/g, "\'");
-        
-        // Destacar se tem foto
-        const fotoIcon = r.fotoUrl ? '📸' : '👤';
-        
-        return `<div class="autocomplete-item" onclick="selectResident('${nomeEscapado}', '${enderecoEscapado}')">
-            <strong>${fotoIcon} ${r.nome || 'Sem nome'}</strong>
-            <small>🏠 ${r.endereco || 'Sem endereço'}${r.telefone ? ' • 📞 ' + r.telefone : ''}</small>
-        </div>`;
-    }).join('');
+    list.innerHTML = '';
     
-    // Mostrar contador de resultados
+    filtered.slice(0, 8).forEach(resident => {
+        const fotoIcon = resident.fotoUrl ? '📸' : '👤';
+        
+        const item = document.createElement('div');
+        item.className = 'autocomplete-item';
+        item.innerHTML = `
+            <strong>${fotoIcon} ${resident.nome || 'Sem nome'}</strong>
+            <small>🏠 ${resident.endereco || 'Sem endereço'}${resident.telefone ? ' • 📞 ' + resident.telefone : ''}</small>
+        `;
+        
+        // PASSAR O OBJETO COMPLETO
+        item.onclick = function() {
+            selectResident(resident);
+        };
+        
+        list.appendChild(item);
+    });
+    
+    // Mostrar contador
     if (filtered.length > 8) {
-        list.innerHTML += `<div class="autocomplete-item" style="background: var(--gray-light); text-align: center; font-size: 0.75em; color: var(--gray); cursor: default;">
-            + ${filtered.length - 8} resultados não exibidos
-        </div>`;
+        const counter = document.createElement('div');
+        counter.className = 'autocomplete-item';
+        counter.style.cssText = 'background: var(--gray-light); text-align: center; font-size: 0.75em; color: var(--gray); cursor: default;';
+        counter.textContent = `+ ${filtered.length - 8} resultados não exibidos`;
+        list.appendChild(counter);
     }
     
     list.classList.add('show');
 }
-
-        function selectResident(nome, endereco) {
-            document.getElementById('destination').value = `${nome} - ${endereco}`;
-            document.getElementById('autocompleteList').classList.remove('show');
-        }
 
         // ========== REGISTRAR ENTRADA (COM VERIFICAÇÕES) ==========
         document.getElementById('accessForm').addEventListener('submit', async function(e) {
@@ -5618,6 +5648,146 @@ function downloadResidentsCSV() {
                 document.getElementById('nameAutocompleteList').classList.remove('show');
             }
         });
+        // ============================================
+// CONFIGURAÇÕES GLOBAIS
+// ============================================
+
+let configGlobal = {
+    systemName: "ZECURE",
+    primaryColor: "#4C7799",
+    logoUrl: "",
+    configPassword: "admin"
+};
+
+// Carregar configurações do Firebase
+async function loadGlobalConfig() {
+    try {
+        const doc = await db.collection('configuracoes').doc('sistema').get();
+        
+        if (doc.exists) {
+            configGlobal = { ...configGlobal, ...doc.data() };
+            console.log("✅ Configurações globais carregadas");
+        } else {
+            await db.collection('configuracoes').doc('sistema').set(configGlobal);
+        }
+        
+        applyGlobalConfig();
+        
+    } catch (error) {
+        console.error("❌ Erro ao carregar configurações:", error);
+        applyGlobalConfig();
+    }
+}
+
+// Aplicar configurações em TUDO
+function applyGlobalConfig() {
+    // Aplicar cor em TODO o sistema
+    document.documentElement.style.setProperty('--primary', configGlobal.primaryColor);
+    
+    // Aplicar nome no header
+    const headerTitle = document.querySelector('header h1');
+    if (headerTitle) headerTitle.textContent = configGlobal.systemName;
+    
+    // Aplicar no title
+    document.title = configGlobal.systemName + " - Controle de Acesso";
+    
+    // Aplicar logo
+    if (configGlobal.logoUrl) {
+        const logos = document.querySelectorAll('header img, .logo img');
+        logos.forEach(img => img.src = configGlobal.logoUrl);
+    }
+    
+    console.log("🎨 Configurações aplicadas em TODO o sistema");
+}
+
+// Atualizar preview da cor
+function updateColorPreview() {
+    const color = document.getElementById('systemColor').value;
+    document.getElementById('colorPreview').style.background = color;
+}
+
+// Salvar configurações GLOBALMENTE
+async function saveGlobalCustomization() {
+    try {
+        showLoading('Salvando configurações globais...');
+        
+        const newSystemName = document.getElementById('systemName').value.trim();
+        const newColor = document.getElementById('systemColor').value;
+        
+        if (!newSystemName) {
+            hideLoading();
+            alert("⚠️ Digite um nome para o sistema");
+            return;
+        }
+        
+        configGlobal.systemName = newSystemName;
+        configGlobal.primaryColor = newColor;
+        
+        // Salvar no Firebase
+        await db.collection('configuracoes').doc('sistema').update({
+            systemName: newSystemName,
+            primaryColor: newColor
+        });
+        
+        // Aplicar IMEDIATAMENTE em tudo
+        applyGlobalConfig();
+        
+        hideLoading();
+        
+        alert("✅ Configurações salvas! Todos os usuários verão as mudanças ao recarregar.");
+        
+    } catch (error) {
+        hideLoading();
+        console.error("❌ Erro:", error);
+        alert("❌ Erro: " + error.message);
+    }
+}
+
+// Alterar senha do config
+async function changeConfigPasswordGlobal() {
+    const newPassword = document.getElementById('newConfigPassword').value;
+    const confirmPassword = document.getElementById('confirmConfigPassword').value;
+    
+    if (!newPassword || !confirmPassword) {
+        alert("⚠️ Preencha ambos os campos");
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        alert("❌ Mínimo 6 caracteres");
+        return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+        alert("❌ Senhas não coincidem");
+        return;
+    }
+    
+    try {
+        showLoading('Alterando senha...');
+        
+        await db.collection('configuracoes').doc('sistema').update({
+            configPassword: newPassword
+        });
+        
+        configGlobal.configPassword = newPassword;
+        localStorage.setItem('configPassword', newPassword);
+        
+        hideLoading();
+        
+        alert("✅ Senha alterada para todos os usuários!");
+        
+        document.getElementById('newConfigPassword').value = '';
+        document.getElementById('confirmConfigPassword').value = '';
+        
+    } catch (error) {
+        hideLoading();
+        alert("❌ Erro: " + error.message);
+    }
+}
+
+// Carregar ao iniciar
+loadGlobalConfig();
     </script>
 </body>
 </html>
